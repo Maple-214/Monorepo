@@ -12,9 +12,14 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.tsx --format cjs,esm --dts --out-dir dist"
+    "build": "tsup src/index.tsx --format cjs,esm --dts --out-dir dist",
+    "dev": "tsup src/index.tsx --watch"
   },
   "dependencies": {
     "react": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.74",
+    "@types/react-dom": "^18.2.24"
   }
 }
