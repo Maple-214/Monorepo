@@ -20,7 +20,16 @@ pnpm install
 ### 2. 启动开发环境
 
 ```bash
+主站独立调试：
 pnpm dev --filter web
+# 打开 http://localhost:5173
+子站独立调试：
+pnpm dev --filter app1
+# 打开 http://localhost:5001
+主站集成子站（只启动需要的子站）：
+pnpm dev --filter app1
+pnpm dev --filter web
+# 主站会按 remotes.json 载入已启动的 app1
 ```
 
 访问地址：
@@ -52,16 +61,70 @@ pnpm build --filter @acme/ui
 
 ```
 .
+monorepo-model/
 ├── apps
-│   └── web          # React 应用 (Vite)
+│   ├── web                 # 主应用 (React + Vite + Module Federation Host)
+│   │   ├── public
+│   │   │   └── index.html
+│   │   ├── src
+│   │   │   ├── App.tsx
+│   │   │   ├── main.tsx
+│   │   │   └── pages/...
+│   │   ├── vite.config.ts
+│   │   ├── package.json
+│   │   └── Dockerfile
+│   │
+│   ├── app1                # 子应用1 (Remote, 可独立运行)
+│   │   ├── public
+│   │   │   └── index.html
+│   │   ├── src
+│   │   │   ├── App.tsx
+│   │   │   ├── bootstrap.tsx
+│   │   │   └── pages/...
+│   │   ├── vite.config.ts
+│   │   ├── package.json
+│   │   └── Dockerfile
+│   │
+│   └── app2                # 子应用2 (Remote, 可独立运行)
+│       ├── public
+│       │   └── index.html
+│       ├── src
+│       │   ├── App.tsx
+│       │   ├── bootstrap.tsx
+│       │   └── pages/...
+│       ├── vite.config.ts
+│       ├── package.json
+│       └── Dockerfile
 │
 ├── packages
-│   ├── ui           # 公共组件库
-│   └── utils        # 工具函数库
+│   ├── ui                  # 公共组件库
+│   │   ├── src
+│   │   │   ├── Button.tsx
+│   │   │   └── index.ts
+│   │   ├── tsconfig.json
+│   │   └── package.json
+│   │
+│   └── utils               # 工具函数库
+│       ├── src
+│       │   ├── format.ts
+│       │   └── index.ts
+│       ├── tsconfig.json
+│       └── package.json
 │
-├── turbo.json       # Turborepo 配置
-├── package.json     # 根依赖
-└── pnpm-workspace.yaml
+├── deploy
+│   ├── nginx.conf          # 通用 Nginx 配置
+│   └── docker-compose.yml  # (可选) 本地一键运行
+│
+├── .husky                  # Git Hooks (pre-commit, commit-msg)
+├── .changeset              # Changesets 配置
+├── .eslintrc.json          # ESLint 配置
+├── .prettierrc             # Prettier 配置
+├── turbo.json              # Turborepo 配置
+├── pnpm-workspace.yaml     # pnpm 工作区声明
+├── package.json            # 根依赖配置
+└── README.md               # 项目说明文档
+
+
 ```
 
 ---
