@@ -1,22 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { loadRemote } from '@module-federation/enhanced/runtime';
+import React, { Suspense } from 'react';
 
-export default function RemoteApp1() {
-  const [Comp, setComp] = useState<React.ComponentType | null>(null);
+// ✅ 直接用插件语法：import('app1/App')
+//   不要自己手写 loadRemote，也不要用 deprecated 的 init()
+const RemoteApp1 = React.lazy(() => import('app1/App'));
 
-  useEffect(() => {
-    async function load() {
-      try {
-        // 直接加载远程模块
-        const mod = await loadRemote('app1/App');
-        setComp(() => mod.default);
-      } catch (err) {
-        console.error('[MF] load app1 failed', err);
-      }
-    }
-    load();
-  }, []);
-
-  if (!Comp) return <div>Loading remote app1...</div>;
-  return <Comp />;
+export default function RemoteApp1Host() {
+  return (
+    <Suspense fallback={<div>Loading App1…</div>}>
+      <RemoteApp1 />
+    </Suspense>
+  );
 }

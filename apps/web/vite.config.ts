@@ -1,21 +1,26 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
+import path from 'node:path';
 import { federation } from '@module-federation/vite';
 
 export default defineConfig(({ command }) => {
-  const isDev = command === 'serve'; // 开发时为 true，构建时为 false
+  const isDev = command === 'serve';
 
   return {
     plugins: [
       react(),
       federation({
         name: 'web',
+        // ✅ 静态声明 remotes（开发期最稳）
         remotes: {
+          // 用对象写法，明确 type=module（Vite 产物是 ESM）
           app1: {
-            type: 'module', // 👈 必须匹配 app1 的输出格式
+            name: 'app1', // 👈 必须加上 name
+            type: 'module',
             entry: 'http://localhost:5001/remoteEntry.js',
           },
+          // 如还有 app2，照此追加
+          // app2: { type: 'module', entry: 'http://localhost:5002/remoteEntry.js' },
         },
         shared: {
           react: { singleton: true, requiredVersion: '^18.0.0' },
@@ -33,15 +38,9 @@ export default defineConfig(({ command }) => {
           : path.resolve(__dirname, '../../packages/utils/dist'),
       },
     },
-    server: {
-      port: 5173,
-    },
-    build: {
-      outDir: 'dist',
-      sourcemap: isDev, // 开发调试方便
-    },
-    // 🚀 性能优化
-    optimizeDeps: { persist: true },
+    server: { port: 5173 },
+    build: { outDir: 'dist', sourcemap: isDev },
+    optimizeDeps: { include: [] },
     cacheDir: '../../node_modules/.vite',
   };
 });
