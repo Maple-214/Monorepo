@@ -5,9 +5,10 @@ on:
     branches: [master]
   push:
     branches: [master]
-  workflow_dispatch: # 手动触发部署
 
-# 避免重复任务浪费
+  # 手动触发（用于部署）
+  workflow_dispatch:
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -16,7 +17,7 @@ permissions:
   contents: read
 
 jobs:
-  # 1️⃣ 变更检测
+  # 1️⃣ 变更分析
   changes:
     runs-on: ubuntu-latest
     outputs:
@@ -59,12 +60,19 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-      - run: corepack enable
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint --filter web
       - run: pnpm typecheck --filter web
       - run: pnpm build --filter web
       - run: pnpm test --filter web
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: apps/web/dist
 
   # 3️⃣ 构建 app1
   build-app1:
@@ -80,12 +88,19 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-      - run: corepack enable
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint --filter app1
       - run: pnpm typecheck --filter app1
       - run: pnpm build --filter app1
       - run: pnpm test --filter app1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app1-remote
+          path: apps/app1/dist
 
   # 4️⃣ 构建 app2
   build-app2:
@@ -101,14 +116,21 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-      - run: corepack enable
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint --filter app2
       - run: pnpm typecheck --filter app2
       - run: pnpm build --filter app2
       - run: pnpm test --filter app2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app2-remote
+          path: apps/app2/dist
 
-  # 5️⃣ 全量构建兜底
+  # 5️⃣ 全量兜底
   build-all:
     needs: changes
     if: |
@@ -127,39 +149,40 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-      - run: corepack enable
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm build
       - run: pnpm test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: apps/web/dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app1-remote
+          path: apps/app1/dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app2-remote
+          path: apps/app2/dist
 
-  # 6️⃣ Docker 打包与推送（仅手动触发）
+  # 6️⃣ Docker 构建 & 推送（仅手动触发）
   docker:
     runs-on: ubuntu-latest
+    needs: build-all
     if: github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
-
-      # ✅ 复用 pnpm 缓存
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: corepack enable
-      - run: pnpm install --frozen-lockfile
-
-      # ✅ 构建 Docker 镜像，挂载 .pnpm-store 提速
       - name: Build Docker images
         run: |
-          docker build --build-arg PNPM_STORE=/root/.local/share/pnpm/store \
-            -t myorg/web:latest -f apps/web/Dockerfile .
-          docker build --build-arg PNPM_STORE=/root/.local/share/pnpm/store \
-            -t myorg/app1:latest -f apps/app1/Dockerfile .
-          docker build --build-arg PNPM_STORE=/root/.local/share/pnpm/store \
-            -t myorg/app2:latest -f apps/app2/Dockerfile .
-
-      # ✅ 推送到 Docker Hub
+          docker build -t myorg/web:latest -f apps/web/Dockerfile .
+          docker build -t myorg/app1:latest -f apps/app1/Dockerfile .
+          docker build -t myorg/app2:latest -f apps/app2/Dockerfile .
       - name: Push Docker images
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
