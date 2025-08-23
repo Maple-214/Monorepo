@@ -32,9 +32,6 @@ pnpm dev --filter web
 # 主站会按 remotes.json 载入已启动的 app1
 ```
 
-访问地址：
-http://localhost:5173
-
 ### 3. 构建项目
 
 构建整个 Monorepo：
@@ -237,6 +234,7 @@ resolve: {
 
 ## 📌 TODO
 
+- [x] 集成微前端
 - [ ] CI/CD 配置（GitHub Actions / GitLab CI）
 - [ ] UI 组件库文档站点（Storybook 或 Ladle）
 - [ ] 单元测试覆盖 ui 与 utils

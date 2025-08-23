@@ -1,0 +1,26 @@
+{
+  "name": "app2",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev --port 5001",
+    "build": "vite build",
+    "serve": "vite preview --port 5001 --strictPort",
+    "watch": "vite build --watch --mode development",
+    "watch:serve": "concurrently \"pnpm watch\" \"http-server ./dist -p 5001 --cors\""
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@acme/ui": "workspace:*",
+    "@acme/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.8",
+    "http-server": "^14.1.1",
+    "concurrently": "^8.2.2"
+  }
+}

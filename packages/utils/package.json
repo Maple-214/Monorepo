@@ -1,18 +1,16 @@
 {
   "name": "@acme/utils",
   "version": "0.0.0",
+  "private": true,
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts --out-dir dist",
-    "dev": "tsup src/index.ts --watch"
+    "build": "tsc -p tsconfig.json --outDir dist",
+    "dev": "tsup src/index.ts --format esm --watch --out-dir dist"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
   }
 }

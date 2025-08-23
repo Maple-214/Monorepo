@@ -5,7 +5,12 @@
       "outputs": ["dist/**", "types/**"]
     },
     "dev": {
-      "cache": false
+      "cache": false,
+      "persistent": true
+    },
+    "dev:mf": {
+      "cache": false,
+      "persistent": true
     },
     "lint": {
       "outputs": []

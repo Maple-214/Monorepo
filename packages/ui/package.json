@@ -1,25 +1,20 @@
 {
   "name": "@acme/ui",
   "version": "0.0.0",
+  "private": true,
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
   "scripts": {
-    "build": "tsup src/index.tsx --format cjs,esm --dts --out-dir dist",
-    "dev": "tsup src/index.tsx --watch"
+    "build": "tsc -p tsconfig.json --outDir dist",
+    "dev": "tsup src/index.tsx --format esm --watch --out-dir dist"
   },
   "dependencies": {
-    "react": "^18.0.0"
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
   },
   "devDependencies": {
-    "@types/react": "^18.2.74",
-    "@types/react-dom": "^18.2.24"
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
   }
 }
