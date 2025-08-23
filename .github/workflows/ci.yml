@@ -7,7 +7,7 @@ on:
     branches: [master]
   workflow_dispatch: # 手动触发部署
 
-# 同一分支上的重复运行自动取消，更快
+# 避免重复任务浪费
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  # 1) 变更分析：判断本次提交改了哪些目录
+  # 1️⃣ 变更检测
   changes:
     runs-on: ubuntu-latest
     outputs:
@@ -24,10 +24,8 @@ jobs:
       app1: ${{ steps.filter.outputs.app1 }}
       app2: ${{ steps.filter.outputs.app2 }}
       packages: ${{ steps.filter.outputs.packages }}
-      has_changes: ${{ steps.filter.outputs.web == 'true' || steps.filter.outputs.app1 == 'true' || steps.filter.outputs.app2 == 'true' || steps.filter.outputs.packages == 'true' }}
     steps:
       - uses: actions/checkout@v4
-
       - name: Detect changed paths
         id: filter
         uses: dorny/paths-filter@v3
@@ -47,149 +45,124 @@ jobs:
               - 'turbo.json'
               - 'tsconfig*.json'
 
-  # 2) CI 验证 - 智能增量构建
-  ci:
+  # 2️⃣ 构建 web
+  build-web:
     needs: changes
-    # 跳过没有实际变更的情况
-    if: needs.changes.outputs.has_changes == 'true' || github.event_name == 'workflow_dispatch'
-    strategy:
-      matrix:
-        include:
-          - name: web
-            condition: ${{ needs.changes.outputs.web == 'true' || needs.changes.outputs.packages == 'true' || github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-            filters: --filter web
-            cache_key: turbo-web
-            artifact: web-dist
-            artifact_path: apps/web/dist
-          - name: app1
-            condition: ${{ needs.changes.outputs.app1 == 'true' || needs.changes.outputs.packages == 'true' || github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-            filters: --filter app1
-            cache_key: turbo-app1
-            artifact: app1-remote
-            artifact_path: apps/app1/dist
-          - name: app2
-            condition: ${{ needs.changes.outputs.app2 == 'true' || needs.changes.outputs.packages == 'true' || github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-            filters: --filter app2
-            cache_key: turbo-app2
-            artifact: app2-remote
-            artifact_path: apps/app2/dist
-          - name: all
-            condition: ${{ (needs.changes.outputs.app1 == 'true' && needs.changes.outputs.app2 == 'true') || (needs.changes.outputs.web == 'true' && (needs.changes.outputs.app1 == 'true' || needs.changes.outputs.app2 == 'true')) || github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-            filters: ''
-            cache_key: turbo-all
+    if: |
+      github.event_name == 'pull_request' &&
+      (needs.changes.outputs.web == 'true' || needs.changes.outputs.packages == 'true') &&
+      needs.changes.outputs.app1 != 'true' && needs.changes.outputs.app2 != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: pnpm
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint --filter web
+      - run: pnpm typecheck --filter web
+      - run: pnpm build --filter web
+      - run: pnpm test --filter web
 
-      - name: Enable Corepack (for pnpm)
-        run: corepack enable
-
-      - name: Install
-        run: pnpm install --frozen-lockfile
-
-      - name: Turbo cache
-        uses: actions/cache@v4
+  # 3️⃣ 构建 app1
+  build-app1:
+    needs: changes
+    if: |
+      github.event_name == 'pull_request' &&
+      (needs.changes.outputs.app1 == 'true' || needs.changes.outputs.packages == 'true') &&
+      needs.changes.outputs.app2 != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          path: node_modules/.cache/turbo
-          key: ${{ matrix.cache_key }}-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ matrix.cache_key }}-${{ runner.os }}-
+          node-version: 20
+          cache: pnpm
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint --filter app1
+      - run: pnpm typecheck --filter app1
+      - run: pnpm build --filter app1
+      - run: pnpm test --filter app1
 
-      - name: Determine build scope
-        id: scope
-        run: |
-          # PR 事件且不是全量构建时，使用矩阵中的 filters
-          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ matrix.name }}" != "all" ]; then
-            echo "BUILD_SCOPE=${{ matrix.filters }}" >> $GITHUB_OUTPUT
-          else
-            # push 事件或手动触发或需要全量构建时，构建所有
-            echo "BUILD_SCOPE=" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Lint
-        run: pnpm lint ${{ steps.scope.outputs.BUILD_SCOPE }}
-
-      - name: Typecheck
-        run: pnpm typecheck ${{ steps.scope.outputs.BUILD_SCOPE }}
-
-      - name: Build
-        run: pnpm build ${{ steps.scope.outputs.BUILD_SCOPE }}
-
-      - name: Test
-        run: pnpm test ${{ steps.scope.outputs.BUILD_SCOPE }}
-
-      - name: Upload artifacts
-        if: matrix.artifact != '' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-        uses: actions/upload-artifact@v4
+  # 4️⃣ 构建 app2
+  build-app2:
+    needs: changes
+    if: |
+      github.event_name == 'pull_request' &&
+      (needs.changes.outputs.app2 == 'true' || needs.changes.outputs.packages == 'true') &&
+      needs.changes.outputs.app1 != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          name: ${{ matrix.artifact }}
-          path: ${{ matrix.artifact_path }}
-          if-no-files-found: warn
-          retention-days: 7
+          node-version: 20
+          cache: pnpm
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint --filter app2
+      - run: pnpm typecheck --filter app2
+      - run: pnpm build --filter app2
+      - run: pnpm test --filter app2
 
-  # 3) Docker 打包 & 推送（仅手动触发）
+  # 5️⃣ 全量构建兜底
+  build-all:
+    needs: changes
+    if: |
+      github.event_name == 'push' ||
+      (
+        github.event_name == 'pull_request' &&
+        (
+          (needs.changes.outputs.app1 == 'true' && needs.changes.outputs.app2 == 'true') ||
+          (needs.changes.outputs.web == 'true' && (needs.changes.outputs.app1 == 'true' || needs.changes.outputs.app2 == 'true'))
+        )
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm build
+      - run: pnpm test
+
+  # 6️⃣ Docker 打包与推送（仅手动触发）
   docker:
     runs-on: ubuntu-latest
-    needs: [changes, ci]
     if: github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      # ✅ 复用 pnpm 缓存
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: pnpm
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
 
-      - name: Enable Corepack (for pnpm)
-        run: corepack enable
+      # ✅ 构建 Docker 镜像，挂载 .pnpm-store 提速
+      - name: Build Docker images
+        run: |
+          docker build --build-arg PNPM_STORE=/root/.local/share/pnpm/store \
+            -t myorg/web:latest -f apps/web/Dockerfile .
+          docker build --build-arg PNPM_STORE=/root/.local/share/pnpm/store \
+            -t myorg/app1:latest -f apps/app1/Dockerfile .
+          docker build --build-arg PNPM_STORE=/root/.local/share/pnpm/store \
+            -t myorg/app2:latest -f apps/app2/Dockerfile .
 
-      - name: Install (for Docker build context)
-        run: pnpm install --frozen-lockfile
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: dist
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and push Docker images
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/web/Dockerfile
-          tags: myorg/web:latest
-          push: true
-          build-args: |
-            NODE_ENV=production
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push app1
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/app1/Dockerfile
-          tags: myorg/app1:latest
-          push: true
-          build-args: |
-            NODE_ENV=production
-
-      - name: Build and push app2
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/app2/Dockerfile
-          tags: myorg/app2:latest
-          push: true
-          build-args: |
-            NODE_ENV=production
+      # ✅ 推送到 Docker Hub
+      - name: Push Docker images
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker push myorg/web:latest
+          docker push myorg/app1:latest
+          docker push myorg/app2:latest
