@@ -1,23 +1,72 @@
 name: CI
+
 on:
   pull_request:
+    branches: [master]
   push:
-    branches: [ main ]
+    branches: [master]
+
+# 同一分支上的重复运行自动取消，更快
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  build-test:
+  # 1) 变更分析：判断本次提交改了哪些目录
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+      app1: ${{ steps.filter.outputs.app1 }}
+      app2: ${{ steps.filter.outputs.app2 }}
+      packages: ${{ steps.filter.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect changed paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            web:
+              - 'apps/web/**'
+            app1:
+              - 'apps/app1/**'
+            app2:
+              - 'apps/app2/**'
+            packages:
+              - 'packages/**'
+              - 'pnpm-workspace.yaml'
+              - 'package.json'
+              - 'turbo.json'
+              - 'tsconfig*.json'
+
+  # 2) 仅构建 web（当 PR 只改了 web 或 packages；push 走全量构建，不跑本 job）
+  build-web:
+    needs: changes
+    if: |
+      github.event_name == 'pull_request' &&
+      (needs.changes.outputs.web == 'true' || needs.changes.outputs.packages == 'true') &&
+      needs.changes.outputs.app1 != 'true' && needs.changes.outputs.app2 != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Node
+      - name: Setup Node (cache pnpm store)
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: pnpm
 
       - name: Setup pnpm
-        run: corepack enable
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
 
       - name: Install
         run: pnpm install --frozen-lockfile
@@ -25,20 +74,210 @@ jobs:
       - name: Turbo cache
         uses: actions/cache@v4
         with:
-          path: |
-            node_modules/.cache/turbo
-          key: turbo-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ github.sha }}
+          path: node_modules/.cache/turbo
+          key: turbo-web-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            turbo-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
+            turbo-web-${{ runner.os }}-
 
-      - name: Lint
+      - name: Lint (web)
+        run: pnpm lint --filter web
+
+      - name: Typecheck (web)
+        run: pnpm typecheck --filter web
+
+      - name: Build (web)
+        run: pnpm build --filter web
+
+      - name: Test (web)
+        run: pnpm test --filter web
+
+      - name: Upload artifact (web dist)
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: apps/web/dist
+          if-no-files-found: warn
+          retention-days: 7
+
+  # 3) 构建 app1（PR 只改 app1 或 packages；push 走全量构建不跑本 job）
+  build-app1:
+    needs: changes
+    if: |
+      github.event_name == 'pull_request' &&
+      (needs.changes.outputs.app1 == 'true' || needs.changes.outputs.packages == 'true') &&
+      needs.changes.outputs.app2 != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node (cache pnpm store)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/turbo
+          key: turbo-app1-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            turbo-app1-${{ runner.os }}-
+
+      - name: Lint (app1)
+        run: pnpm lint --filter app1
+
+      - name: Typecheck (app1)
+        run: pnpm typecheck --filter app1
+
+      - name: Build (app1)
+        run: pnpm build --filter app1
+
+      - name: Test (app1)
+        run: pnpm test --filter app1
+
+      - name: Upload artifact (app1 dist)
+        uses: actions/upload-artifact@v4
+        with:
+          name: app1-remote
+          path: apps/app1/dist
+          if-no-files-found: warn
+          retention-days: 7
+
+  # 4) 构建 app2（PR 只改 app2 或 packages；push 走全量构建不跑本 job）
+  build-app2:
+    needs: changes
+    if: |
+      github.event_name == 'pull_request' &&
+      (needs.changes.outputs.app2 == 'true' || needs.changes.outputs.packages == 'true') &&
+      needs.changes.outputs.app1 != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node (cache pnpm store)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/turbo
+          key: turbo-app2-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            turbo-app2-${{ runner.os }}-
+
+      - name: Lint (app2)
+        run: pnpm lint --filter app2
+
+      - name: Typecheck (app2)
+        run: pnpm typecheck --filter app2
+
+      - name: Build (app2)
+        run: pnpm build --filter app2
+
+      - name: Test (app2)
+        run: pnpm test --filter app2
+
+      - name: Upload artifact (app2 dist)
+        uses: actions/upload-artifact@v4
+        with:
+          name: app2-remote
+          path: apps/app2/dist
+          if-no-files-found: warn
+          retention-days: 7
+
+  # 5) 全量兜底（push 到 master 一律全量；或 PR 同时改多个子站时统一全量）
+  build-all:
+    needs: changes
+    if: |
+      github.event_name == 'push' ||
+      (
+        github.event_name == 'pull_request' &&
+        (
+          (needs.changes.outputs.app1 == 'true' && needs.changes.outputs.app2 == 'true') ||
+          (needs.changes.outputs.web == 'true' && (needs.changes.outputs.app1 == 'true' || needs.changes.outputs.app2 == 'true'))
+        )
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node (cache pnpm store)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/turbo
+          key: turbo-all-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            turbo-all-${{ runner.os }}-
+
+      - name: Lint (all)
         run: pnpm lint
 
-      - name: Typecheck
+      - name: Typecheck (all)
         run: pnpm typecheck
 
-      - name: Build
+      - name: Build (all)
         run: pnpm build
 
-      - name: Test
+      - name: Test (all)
         run: pnpm test
+
+      - name: Upload artifact (web)
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: apps/web/dist
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload artifact (app1)
+        uses: actions/upload-artifact@v4
+        with:
+          name: app1-remote
+          path: apps/app1/dist
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload artifact (app2)
+        uses: actions/upload-artifact@v4
+        with:
+          name: app2-remote
+          path: apps/app2/dist
+          if-no-files-found: warn
+          retention-days: 7
