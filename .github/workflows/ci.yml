@@ -1,15 +1,13 @@
 name: CI/CD
 
 on:
-  # PR 和 push 都会触发 CI 验证流程
   pull_request:
+    branches: [master]
   push:
     branches: [master]
+  workflow_dispatch: # 手动触发部署
 
-  # 手动触发部署
-  workflow_dispatch:
-
-# 防止重复任务浪费
+# 同一分支上的重复运行自动取消，更快
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -18,49 +16,138 @@ permissions:
   contents: read
 
 jobs:
-  # 1️⃣ 常规 CI 验证
+  # 1) 变更分析：判断本次提交改了哪些目录
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+      app1: ${{ steps.filter.outputs.app1 }}
+      app2: ${{ steps.filter.outputs.app2 }}
+      packages: ${{ steps.filter.outputs.packages }}
+      has_changes: ${{ steps.filter.outputs.web == 'true' || steps.filter.outputs.app1 == 'true' || steps.filter.outputs.app2 == 'true' || steps.filter.outputs.packages == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect changed paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            web:
+              - 'apps/web/**'
+            app1:
+              - 'apps/app1/**'
+            app2:
+              - 'apps/app2/**'
+            packages:
+              - 'packages/**'
+              - 'pnpm-workspace.yaml'
+              - 'package.json'
+              - 'turbo.json'
+              - 'tsconfig*.json'
+
+  # 2) CI 验证 - 智能增量构建
   ci:
+    needs: changes
+    # 跳过没有实际变更的情况
+    if: needs.changes.outputs.has_changes == 'true' || github.event_name == 'workflow_dispatch'
+    strategy:
+      matrix:
+        include:
+          - name: web
+            condition: ${{ needs.changes.outputs.web == 'true' || needs.changes.outputs.packages == 'true' || github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+            filters: --filter web
+            cache_key: turbo-web
+            artifact: web-dist
+            artifact_path: apps/web/dist
+          - name: app1
+            condition: ${{ needs.changes.outputs.app1 == 'true' || needs.changes.outputs.packages == 'true' || github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+            filters: --filter app1
+            cache_key: turbo-app1
+            artifact: app1-remote
+            artifact_path: apps/app1/dist
+          - name: app2
+            condition: ${{ needs.changes.outputs.app2 == 'true' || needs.changes.outputs.packages == 'true' || github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+            filters: --filter app2
+            cache_key: turbo-app2
+            artifact: app2-remote
+            artifact_path: apps/app2/dist
+          - name: all
+            condition: ${{ (needs.changes.outputs.app1 == 'true' && needs.changes.outputs.app2 == 'true') || (needs.changes.outputs.web == 'true' && (needs.changes.outputs.app1 == 'true' || needs.changes.outputs.app2 == 'true')) || github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+            filters: ''
+            cache_key: turbo-all
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node & pnpm
+      - name: Setup Node (cache pnpm store)
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
-      - run: corepack enable
 
-      - name: Install deps
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install
         run: pnpm install --frozen-lockfile
 
       - name: Turbo cache
         uses: actions/cache@v4
         with:
           path: node_modules/.cache/turbo
-          key: turbo-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ matrix.cache_key }}-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            turbo-${{ runner.os }}-
+            ${{ matrix.cache_key }}-${{ runner.os }}-
+
+      - name: Determine build scope
+        id: scope
+        run: |
+          # PR 事件且不是全量构建时，使用矩阵中的 filters
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ matrix.name }}" != "all" ]; then
+            echo "BUILD_SCOPE=${{ matrix.filters }}" >> $GITHUB_OUTPUT
+          else
+            # push 事件或手动触发或需要全量构建时，构建所有
+            echo "BUILD_SCOPE=" >> $GITHUB_OUTPUT
+          fi
 
       - name: Lint
-        run: pnpm lint
+        run: pnpm lint ${{ steps.scope.outputs.BUILD_SCOPE }}
 
       - name: Typecheck
-        run: pnpm typecheck
+        run: pnpm typecheck ${{ steps.scope.outputs.BUILD_SCOPE }}
 
       - name: Build
-        run: pnpm build
+        run: pnpm build ${{ steps.scope.outputs.BUILD_SCOPE }}
 
       - name: Test
-        run: pnpm test
+        run: pnpm test ${{ steps.scope.outputs.BUILD_SCOPE }}
 
-  # 2️⃣ Docker 打包 & 推送（仅手动触发）
+      - name: Upload artifacts
+        if: matrix.artifact != '' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact_path }}
+          if-no-files-found: warn
+          retention-days: 7
+
+  # 3) Docker 打包 & 推送（仅手动触发）
   docker:
     runs-on: ubuntu-latest
-    needs: ci
+    needs: [changes, ci]
     if: github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
 
       - name: Build Docker images
         run: |
