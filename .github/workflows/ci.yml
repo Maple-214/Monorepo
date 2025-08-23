@@ -81,17 +81,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node (cache pnpm store)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
+          cache: 'pnpm'
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
+      - name: Enable Corepack (for pnpm)
+        run: corepack enable
 
       - name: Install
         run: pnpm install --frozen-lockfile
@@ -144,20 +141,55 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Enable Corepack (for pnpm)
+        run: corepack enable
+
+      - name: Install (for Docker build context)
+        run: pnpm install --frozen-lockfile
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: dist
 
-      - name: Build Docker images
-        run: |
-          docker build -t myorg/web:latest -f apps/web/Dockerfile .
-          docker build -t myorg/app1:latest -f apps/app1/Dockerfile .
-          docker build -t myorg/app2:latest -f apps/app2/Dockerfile .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Push Docker images
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-          docker push myorg/web:latest
-          docker push myorg/app1:latest
-          docker push myorg/app2:latest
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          tags: myorg/web:latest
+          push: true
+          build-args: |
+            NODE_ENV=production
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push app1
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/app1/Dockerfile
+          tags: myorg/app1:latest
+          push: true
+          build-args: |
+            NODE_ENV=production
+
+      - name: Build and push app2
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/app2/Dockerfile
+          tags: myorg/app2:latest
+          push: true
+          build-args: |
+            NODE_ENV=production
