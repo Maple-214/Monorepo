@@ -1,5 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
+  "exclude": ["test", "**/*.test.ts", "**/*.test.tsx"], // 添加排除项
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

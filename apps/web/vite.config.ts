@@ -39,7 +39,7 @@ export default defineConfig(({ command }) => {
       },
     },
     server: { port: 5173 },
-    build: { outDir: 'dist', sourcemap: isDev },
+    build: { outDir: 'dist', sourcemap: isDev, target: 'es2022' },
     optimizeDeps: { include: [] },
     cacheDir: '../../node_modules/.vite',
   };

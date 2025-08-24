@@ -1,5 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["src"],
-  "compilerOptions": { "outDir": "types", "declaration": true, "emitDeclarationOnly": true }
+  "include": ["src", "test", "**/*.test.ts", "**/*.test.tsx"],
+  "compilerOptions": {
+    "outDir": "types",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "types": ["@testing-library/jest-dom"] // 添加这行
+  }
 }
