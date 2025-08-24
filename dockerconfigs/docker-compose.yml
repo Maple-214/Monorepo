@@ -1,21 +1,22 @@
-# 生产环境用
+version: '3.8'
+
 services:
   app1:
-    image: maple214/app1:latest
+    image: crpi-x3f046xkcyg3q9cl.cn-hangzhou.personal.cr.aliyuncs.com/maple_214/app1:latest
     container_name: app1
     restart: always
     ports:
       - '5001:80'
 
   app2:
-    image: maple214/app2:latest
+    image: crpi-x3f046xkcyg3q9cl.cn-hangzhou.personal.cr.aliyuncs.com/maple_214/app2:latest
     container_name: app2
     restart: always
     ports:
       - '5002:80'
 
   web:
-    image: maple214/web:latest
+    image: crpi-x3f046xkcyg3q9cl.cn-hangzhou.personal.cr.aliyuncs.com/maple_214/web:latest
     container_name: web
     restart: always
     depends_on:

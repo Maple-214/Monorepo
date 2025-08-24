@@ -235,7 +235,7 @@ resolve: {
 ## 📌 TODO
 
 - [x] 集成微前端
-- [ ] CI/CD 配置（GitHub Actions / GitLab CI）
+- [x] CI/CD 配置（GitHub Actions / GitLab CI）
 - [ ] UI 组件库文档站点（Storybook 或 Ladle）
 - [ ] 单元测试覆盖 ui 与 utils
 

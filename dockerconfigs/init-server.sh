@@ -27,25 +27,16 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plu
 sudo systemctl enable docker
 sudo systemctl start docker
 
-# 7. 配置 Docker 镜像加速器
-sudo mkdir -p /etc/docker
-cat <<EOF | sudo tee /etc/docker/daemon.json
-{
-  "registry-mirrors": [
-    "https://docker.m.daocloud.io",
-    "https://registry.docker-cn.com",
-    "https://mirror.iscas.ac.cn",
-    "https://ccr.ccs.tencentyun.com"
-  ]
-}
-EOF
-
-# 8. 重启 Docker
-sudo systemctl daemon-reexec
-sudo systemctl restart docker
-
-echo "✅ Docker 安装完成并配置加速器成功"
-
-# 9. 验证
+# 7. 验证版本
 docker --version
 docker compose version
+
+# 8. 登录阿里云镜像仓库（需要你传入账号和密码）
+# 替换 <username> 和 <password>，或者在脚本执行前导出环境变量
+if [ -n "$ALIYUN_USER" ] && [ -n "$ALIYUN_PASS" ]; then
+  echo "🔑 使用环境变量登录阿里云 ACR..."
+  echo "$ALIYUN_PASS" | docker login --username="$ALIYUN_USER" --password-stdin crpi-x3f046xkcyg3q9cl.cn-hangzhou.personal.cr.aliyuncs.com
+else
+  echo "⚠️ 请手动运行以下命令完成 ACR 登录："
+  echo "docker login --username=maple_214 crpi-x3f046xkcyg3q9cl.cn-hangzhou.personal.cr.aliyuncs.com"
+fi

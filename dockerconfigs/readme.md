@@ -31,6 +31,7 @@ docker compose version
 
 #后续更新
 cd ~/myapp-deploy
+登录阿里ACR
 docker compose pull
 docker compose up -d
 docker ps
