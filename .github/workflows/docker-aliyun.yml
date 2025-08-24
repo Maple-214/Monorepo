@@ -1,0 +1,36 @@
+name: Docker Build and Push to Aliyun
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Docker image tag'
+        required: true
+        default: 'latest'
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build Docker images
+        run: |
+          set -e
+          docker build -t registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACE }}/web:${{ github.event.inputs.tag }} -f apps/web/Dockerfile .
+          docker build -t registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACE }}/app1:${{ github.event.inputs.tag }} -f apps/app1/Dockerfile .
+          docker build -t registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACE }}/app2:${{ github.event.inputs.tag }} -f apps/app2/Dockerfile .
+
+      - name: Login and Push to Aliyun
+        run: |
+          set -e
+          docker login --username=${{ secrets.ALIYUN_USERNAME }} --password=${{ secrets.ALIYUN_PASSWORD }} registry.cn-hangzhou.aliyuncs.com
+          docker push registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACE }}/web:${{ github.event.inputs.tag }}
+          docker push registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACE }}/app1:${{ github.event.inputs.tag }}
+          docker push registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACE }}/app2:${{ github.event.inputs.tag }}
