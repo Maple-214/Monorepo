@@ -1,0 +1,26 @@
+version: '3.9'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - '80:80' # 主站直接暴露 80
+    depends_on:
+      - app1
+      - app2
+
+  app1:
+    build:
+      context: .
+      dockerfile: apps/app1/Dockerfile
+    expose:
+      - '80'
+
+  app2:
+    build:
+      context: .
+      dockerfile: apps/app2/Dockerfile
+    expose:
+      - '80'
