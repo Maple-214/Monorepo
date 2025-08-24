@@ -1,12 +1,13 @@
-name: CI
+name: CI/CD
 
 on:
   pull_request:
     branches: [master]
   push:
     branches: [master]
+  # 手动触发（用于 Docker 部署）
+  workflow_dispatch:
 
-# 同一分支上的重复运行自动取消，更快
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -15,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  # 1) 变更分析：判断本次提交改了哪些目录
+  # 1️⃣ 变更分析
   changes:
     runs-on: ubuntu-latest
     outputs:
@@ -25,7 +26,6 @@ jobs:
       packages: ${{ steps.filter.outputs.packages }}
     steps:
       - uses: actions/checkout@v4
-
       - name: Detect changed paths
         id: filter
         uses: dorny/paths-filter@v3
@@ -45,7 +45,20 @@ jobs:
               - 'turbo.json'
               - 'tsconfig*.json'
 
-  # 2) 仅构建 web（当 PR 只改了 web 或 packages；push 走全量构建，不跑本 job）
+  # 复用步骤：Node + pnpm
+  setup-env: &setup-env
+    uses: actions/setup-node@v4
+    with:
+      node-version: 20
+      cache: pnpm
+
+  setup-pnpm: &setup-pnpm
+    uses: pnpm/action-setup@v4
+    with:
+      version: 9
+      run_install: false
+
+  # 2️⃣ 构建 web
   build-web:
     needs: changes
     if: |
@@ -55,51 +68,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node (cache pnpm store)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-
-      - name: Install
-        run: pnpm install --frozen-lockfile
-
-      - name: Turbo cache
-        uses: actions/cache@v4
-        with:
-          path: node_modules/.cache/turbo
-          key: turbo-web-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            turbo-web-${{ runner.os }}-
-
-      - name: Lint (web)
-        run: pnpm lint --filter web
-
-      - name: Typecheck (web)
-        run: pnpm typecheck --filter web
-
-      - name: Build (web)
-        run: pnpm build --filter web
-
-      - name: Test (web)
-        run: pnpm test --filter web
-
-      - name: Upload artifact (web dist)
-        uses: actions/upload-artifact@v4
+      - *setup-env
+      - *setup-pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint --filter web
+      - run: pnpm typecheck --filter web
+      - run: pnpm build --filter web
+      - run: pnpm test --filter web
+      - uses: actions/upload-artifact@v4
         with:
           name: web-dist
           path: apps/web/dist
-          if-no-files-found: warn
-          retention-days: 7
 
-  # 3) 构建 app1（PR 只改 app1 或 packages；push 走全量构建不跑本 job）
+  # 3️⃣ 构建 app1
   build-app1:
     needs: changes
     if: |
@@ -109,51 +90,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node (cache pnpm store)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-
-      - name: Install
-        run: pnpm install --frozen-lockfile
-
-      - name: Turbo cache
-        uses: actions/cache@v4
-        with:
-          path: node_modules/.cache/turbo
-          key: turbo-app1-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            turbo-app1-${{ runner.os }}-
-
-      - name: Lint (app1)
-        run: pnpm lint --filter app1
-
-      - name: Typecheck (app1)
-        run: pnpm typecheck --filter app1
-
-      - name: Build (app1)
-        run: pnpm build --filter app1
-
-      - name: Test (app1)
-        run: pnpm test --filter app1
-
-      - name: Upload artifact (app1 dist)
-        uses: actions/upload-artifact@v4
+      - *setup-env
+      - *setup-pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint --filter app1
+      - run: pnpm typecheck --filter app1
+      - run: pnpm build --filter app1
+      - run: pnpm test --filter app1
+      - uses: actions/upload-artifact@v4
         with:
           name: app1-remote
           path: apps/app1/dist
-          if-no-files-found: warn
-          retention-days: 7
 
-  # 4) 构建 app2（PR 只改 app2 或 packages；push 走全量构建不跑本 job）
+  # 4️⃣ 构建 app2
   build-app2:
     needs: changes
     if: |
@@ -163,51 +112,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node (cache pnpm store)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-
-      - name: Install
-        run: pnpm install --frozen-lockfile
-
-      - name: Turbo cache
-        uses: actions/cache@v4
-        with:
-          path: node_modules/.cache/turbo
-          key: turbo-app2-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            turbo-app2-${{ runner.os }}-
-
-      - name: Lint (app2)
-        run: pnpm lint --filter app2
-
-      - name: Typecheck (app2)
-        run: pnpm typecheck --filter app2
-
-      - name: Build (app2)
-        run: pnpm build --filter app2
-
-      - name: Test (app2)
-        run: pnpm test --filter app2
-
-      - name: Upload artifact (app2 dist)
-        uses: actions/upload-artifact@v4
+      - *setup-env
+      - *setup-pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint --filter app2
+      - run: pnpm typecheck --filter app2
+      - run: pnpm build --filter app2
+      - run: pnpm test --filter app2
+      - uses: actions/upload-artifact@v4
         with:
           name: app2-remote
           path: apps/app2/dist
-          if-no-files-found: warn
-          retention-days: 7
 
-  # 5) 全量兜底（push 到 master 一律全量；或 PR 同时改多个子站时统一全量）
+  # 5️⃣ 全量兜底
   build-all:
     needs: changes
     if: |
@@ -222,62 +139,44 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node (cache pnpm store)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-
-      - name: Install
-        run: pnpm install --frozen-lockfile
-
-      - name: Turbo cache
-        uses: actions/cache@v4
-        with:
-          path: node_modules/.cache/turbo
-          key: turbo-all-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            turbo-all-${{ runner.os }}-
-
-      - name: Lint (all)
-        run: pnpm lint
-
-      - name: Typecheck (all)
-        run: pnpm typecheck
-
-      - name: Build (all)
-        run: pnpm build
-
-      - name: Test (all)
-        run: pnpm test
-
-      - name: Upload artifact (web)
-        uses: actions/upload-artifact@v4
+      - *setup-env
+      - *setup-pnpm # ✅ 补充了这里
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm build
+      - run: pnpm test
+      - uses: actions/upload-artifact@v4
         with:
           name: web-dist
           path: apps/web/dist
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Upload artifact (app1)
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: app1-remote
           path: apps/app1/dist
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Upload artifact (app2)
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: app2-remote
           path: apps/app2/dist
-          if-no-files-found: warn
-          retention-days: 7
+
+  # 6️⃣ Docker 构建 & 推送（仅手动触发）
+  docker:
+    runs-on: ubuntu-latest
+    needs: build-all
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - *setup-env
+      - *setup-pnpm # ✅ 补充了这里
+      - run: pnpm install --frozen-lockfile
+      - name: Build Docker images
+        run: |
+          docker build -t myorg/web:latest -f apps/web/Dockerfile .
+          docker build -t myorg/app1:latest -f apps/app1/Dockerfile .
+          docker build -t myorg/app2:latest -f apps/app2/Dockerfile .
+      - name: Push Docker images
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker push myorg/web:latest
+          docker push myorg/app1:latest
+          docker push myorg/app2:latest
