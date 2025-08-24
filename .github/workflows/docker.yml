@@ -1,0 +1,28 @@
+name: Docker Build and Push
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Docker image tag'
+        required: true
+        default: 'latest'
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker images
+        run: |
+          docker build -t Maple_Monorepo/web:${{ github.event.inputs.tag }} -f apps/web/Dockerfile .
+          docker build -t Maple_Monorepo/app1:${{ github.event.inputs.tag }} -f apps/app1/Dockerfile .
+          docker build -t Maple_Monorepo/app2:${{ github.event.inputs.tag }} -f apps/app2/Dockerfile .
+
+      - name: Push Docker images
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker push Maple_Monorepo/web:${{ github.event.inputs.tag }}
+          docker push Maple_Monorepo/app1:${{ github.event.inputs.tag }}
+          docker push Maple_Monorepo/app2:${{ github.event.inputs.tag }}
