@@ -12,25 +12,52 @@ jobs:
   docker-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Build Docker images
         run: |
           set -e
-          docker build -t registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACE }}/web:${{ github.event.inputs.tag }} -f apps/web/Dockerfile .
-          docker build -t registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACE }}/app1:${{ github.event.inputs.tag }} -f apps/app1/Dockerfile .
-          docker build -t registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACE }}/app2:${{ github.event.inputs.tag }} -f apps/app2/Dockerfile .
+          echo "Building Docker images..."
+          docker build -t ${{ secrets.ALIYUN_REGISTRY }}/maple_214/web:${{ github.event.inputs.tag }} -f apps/web/Dockerfile .
+          docker build -t ${{ secrets.ALIYUN_REGISTRY }}/maple_214/app1:${{ github.event.inputs.tag }} -f apps/app1/Dockerfile .
+          docker build -t ${{ secrets.ALIYUN_REGISTRY }}/maple_214/app2:${{ github.event.inputs.tag }} -f apps/app2/Dockerfile .
+          echo "Docker images built successfully"
 
-      - name: Login and Push to Aliyun
+      - name: Login to Aliyun Container Registry
         run: |
           set -e
-          docker login --username=${{ secrets.ALIYUN_USERNAME }} --password=${{ secrets.ALIYUN_PASSWORD }} registry.cn-hangzhou.aliyuncs.com
-          docker push registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACE }}/web:${{ github.event.inputs.tag }}
-          docker push registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACE }}/app1:${{ github.event.inputs.tag }}
-          docker push registry.cn-hangzhou.aliyuncs.com/${{ secrets.ALIYUN_NAMESPACE }}/app2:${{ github.event.inputs.tag }}
+          echo "Logging into Aliyun Container Registry..."
+          echo "${{ secrets.ALIYUN_PASSWORD }}" | docker login --username=${{ secrets.ALIYUN_USERNAME }} --password-stdin ${{ secrets.ALIYUN_REGISTRY }}
+          echo "Login successful"
+
+      - name: Push Docker images
+        run: |
+          set -e
+          echo "Pushing images to Aliyun Container Registry..."
+          docker push ${{ secrets.ALIYUN_REGISTRY }}/maple_214/web:${{ github.event.inputs.tag }}
+          docker push ${{ secrets.ALIYUN_REGISTRY }}/maple_214/app1:${{ github.event.inputs.tag }}
+          docker push ${{ secrets.ALIYUN_REGISTRY }}/maple_214/app2:${{ github.event.inputs.tag }}
+          echo "All images pushed successfully"
+
+      - name: Cleanup
+        run: |
+          echo "Cleaning up local images..."
+          docker rmi ${{ secrets.ALIYUN_REGISTRY }}/maple_214/web:${{ github.event.inputs.tag }} || true
+          docker rmi ${{ secrets.ALIYUN_REGISTRY }}/maple_214/app1:${{ github.event.inputs.tag }} || true
+          docker rmi ${{ secrets.ALIYUN_REGISTRY }}/maple_214/app2:${{ github.event.inputs.tag }} || true
+          echo "Cleanup completed"
