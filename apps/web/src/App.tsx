@@ -1,5 +1,7 @@
 import React from 'react';
 import RemoteApp1 from './RemoteApp1';
+import RemoteApp2 from './RemoteApp2';
+
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 // import { Button } from '@acme/ui';
 // import { format_currency } from '@acme/utils';
@@ -19,12 +21,14 @@ export const App: React.FC = () => {
       </div>
       <div>
         <nav style={{ padding: 16, borderBottom: '1px solid #ccc' }}>
-          <Link to="/">主站首页</Link> | <Link to="/app1">子应用 App1</Link>
+          <Link to="/">主站首页</Link>
+          <Link to="/app1">子应用 App1</Link>
           <Link to="/app2">子应用 App2</Link>
         </nav>
         <Routes>
           <Route path="/" element={<h1>主站首页</h1>} />
           <Route path="/app1" element={<RemoteApp1 />} />
+          <Route path="/app2" element={<RemoteApp2 />} />
         </Routes>
       </div>
     </BrowserRouter>

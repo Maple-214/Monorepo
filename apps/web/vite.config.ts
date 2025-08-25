@@ -1,10 +1,12 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
 import { federation } from '@module-federation/vite';
+import { remotes } from './mf/remote';
 
-export default defineConfig(({ command }) => {
+export default defineConfig(({ command, mode }) => {
   const isDev = command === 'serve';
+  const env = loadEnv(mode, process.cwd(), '');
 
   return {
     plugins: [
@@ -12,16 +14,7 @@ export default defineConfig(({ command }) => {
       federation({
         name: 'web',
         // ✅ 静态声明 remotes（开发期最稳）
-        remotes: {
-          // 用对象写法，明确 type=module（Vite 产物是 ESM）
-          app1: {
-            name: 'app1', // 👈 必须加上 name
-            type: 'module',
-            entry: 'http://localhost:5001/remoteEntry.js',
-          },
-          // 如还有 app2，照此追加
-          // app2: { type: 'module', entry: 'http://localhost:5002/remoteEntry.js' },
-        },
+        remotes: remotes(env),
         shared: {
           react: { singleton: true, requiredVersion: '^18.0.0' },
           'react-dom': { singleton: true, requiredVersion: '^18.0.0' },
