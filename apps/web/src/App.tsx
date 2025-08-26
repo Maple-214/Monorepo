@@ -201,10 +201,7 @@ const Navigation: React.FC = () => {
 
       {/* 移动端菜单遮罩 */}
       {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-25 z-40 md:hidden"
-          onClick={closeMobileMenu}
-        />
+        <div className="fixed inset-0  bg-opacity-25 z-40 md:hidden" onClick={closeMobileMenu} />
       )}
     </>
   );
