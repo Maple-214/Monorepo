@@ -24,7 +24,13 @@ export default tseslint.config(js.configs.recommended, ...tseslint.configs.recom
   },
   rules: {
     'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'warn',
+    // 'react-hooks/exhaustive-deps': 'warn',
     'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
   },
+  ignores: [
+    '**/postcss.config.js', // 匹配任意层级的 postcss.config.js
+    '**/tailwind.config.js', // 匹配任意层级的 tailwind.config.js
+    '**/webpack.config.js', // 匹配任意层级的 webpack.config.js
+    '**/vite.config.js', // 匹配任意层级的 vite.config.js
+  ],
 });

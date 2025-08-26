@@ -11,6 +11,11 @@ export default defineConfig(({ command, mode }) => {
   return {
     plugins: [
       react(),
+      // css: {
+      //   modules: {
+      //     localsConvention: 'camelCase'
+      //   }
+      // },
       federation({
         name: 'web',
         // ✅ 静态声明 remotes（开发期最稳）

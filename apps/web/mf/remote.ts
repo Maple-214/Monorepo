@@ -3,7 +3,6 @@ export const remotes = (env: Record<string, string>) => {
   if (!env.VITE_REMOTE_APP1 || !env.VITE_REMOTE_APP2) {
     throw new Error('Missing remote app environment variables');
   }
-  console.log('env', env);
   return {
     app1: {
       name: 'app1',
