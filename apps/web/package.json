@@ -19,11 +19,16 @@
     "react-router-dom": "^7.8.1"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.12",
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^14.3.1",
     "@types/react": "^18.2.74",
     "@types/react-dom": "^18.2.24",
     "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "stylus": "^0.64.0",
+    "tailwindcss": "^4.1.12",
     "typescript": "^5.4.5",
     "vite": "^5.2.8",
     "vitest": "^1.5.0"
