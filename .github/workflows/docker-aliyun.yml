@@ -36,6 +36,8 @@ jobs:
           docker build -t ${{ secrets.ALIYUN_REGISTRY }}/maple_214/web:${{ github.event.inputs.tag }} -f apps/web/Dockerfile .
           docker build -t ${{ secrets.ALIYUN_REGISTRY }}/maple_214/app1:${{ github.event.inputs.tag }} -f apps/app1/Dockerfile .
           docker build -t ${{ secrets.ALIYUN_REGISTRY }}/maple_214/app2:${{ github.event.inputs.tag }} -f apps/app2/Dockerfile .
+          docker build -t ${{ secrets.ALIYUN_REGISTRY }}/maple_214/maple-blog:${{ github.event.inputs.tag }} -f apps/maple-blog/Dockerfile .
+
           echo "Docker images built successfully"
 
       - name: Login to Aliyun Container Registry
@@ -52,6 +54,8 @@ jobs:
           docker push ${{ secrets.ALIYUN_REGISTRY }}/maple_214/web:${{ github.event.inputs.tag }}
           docker push ${{ secrets.ALIYUN_REGISTRY }}/maple_214/app1:${{ github.event.inputs.tag }}
           docker push ${{ secrets.ALIYUN_REGISTRY }}/maple_214/app2:${{ github.event.inputs.tag }}
+          docker push ${{ secrets.ALIYUN_REGISTRY }}/maple_214/maple-blog:${{ github.event.inputs.tag }}
+
           echo "All images pushed successfully"
 
       - name: Cleanup
@@ -60,4 +64,6 @@ jobs:
           docker rmi ${{ secrets.ALIYUN_REGISTRY }}/maple_214/web:${{ github.event.inputs.tag }} || true
           docker rmi ${{ secrets.ALIYUN_REGISTRY }}/maple_214/app1:${{ github.event.inputs.tag }} || true
           docker rmi ${{ secrets.ALIYUN_REGISTRY }}/maple_214/app2:${{ github.event.inputs.tag }} || true
+          docker rmi ${{ secrets.ALIYUN_REGISTRY }}/maple_214/maple-blog:${{ github.event.inputs.tag }} || true
+
           echo "Cleanup completed"
