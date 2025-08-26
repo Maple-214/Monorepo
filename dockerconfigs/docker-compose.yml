@@ -14,7 +14,12 @@ services:
     restart: always
     ports:
       - '5002:80'
-
+  maple-blog:
+    image: crpi-x3f046xkcyg3q9cl.cn-hangzhou.personal.cr.aliyuncs.com/maple_214/maple-blog:latest
+    container_name: maple-blog
+    restart: always
+    ports:
+      - '5003:80'
   web:
     image: crpi-x3f046xkcyg3q9cl.cn-hangzhou.personal.cr.aliyuncs.com/maple_214/web:latest
     container_name: web
