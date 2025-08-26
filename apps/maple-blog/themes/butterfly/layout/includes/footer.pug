@@ -1,0 +1,76 @@
+#footer-wrap
+  #ft
+    img(src="/img/favicon.png",class="ft-img" alt="", srcset="")
+    //- .ft-item-1
+    //-   .t-top
+    //-     .t-t-l
+    //-       p.ft-t.t-l-t 说点什么
+    //-       .bg-ad
+    //-         div
+    //-           | （这里的内容随你写，但是不要过长影响整体美观度，具体可根据实现效果修改）随便说点什么说点什么、随便说点什么说点什么随便说点什么说点什么随便说点什么说点什么随便说点什么说。
+    //-         .btn-xz-box
+    //-           a.btn-xz(href='https://fe32.top/') 点击跳转到哪儿
+    //-     .t-t-r
+    //-       p.ft-t.t-l-t 修仙导航
+    //-       ul.ft-links
+    //-         li
+    //-           a(href='https://fe32.top/articles/hexo1600/') 建站指南
+    //-           a(href='https://fe32.top/nav.html') 网址导航
+    //-         li
+    //-           a(href='https://fe32.top/sponsorWall/') 来杯咖啡
+    //-           a(href='https://fe32.top/comments/') 留点什么
+    //-         li
+    //-           a(href='https://fe32.top/about/') 关于博主
+    //-           a(href='https://fe32.top/archives/') 文章归档
+    //-         li
+    //-           a(href='https://fe32.top/categories/') 文章分类
+    //-           a(href='https://fe32.top/tags/') 文章标签
+    //-         li
+    //-           a(href='https://fe32.top/gallery/') 我的相册
+    //-           a(href='https://fe32.top/bangumis/') 我的追番
+    //-         li
+    //-           a(href='https://fe32.top/specialEffects/') 一些特效
+    //-           a(href='https://fe32.top/wallpaper/') 一些壁纸
+    //- .ft-item-2
+    //-   p.ft-t 推荐友链
+    //-   .ft-img-group
+    //-     .img-group-item
+    //-       a(href='https://fe32.top/')
+    //-         img(src='https://bu.dusays.com/2022/05/02/626f92e193879.jpg' alt='')
+    //-     .img-group-item
+    //-       a(href='https://fe32.top/')
+    //-         img(src='https://bu.dusays.com/2022/05/02/626f92e193879.jpg' alt='')
+    //-     .img-group-item
+    //-       a(href='https://fe32.top/')
+    //-         img(src='https://bu.dusays.com/2022/05/02/626f92e193879.jpg' alt='')
+    //-     .img-group-item
+    //-       a(href='https://fe32.top/')
+    //-         img(src='https://bu.dusays.com/2022/05/02/626f92e193879.jpg' alt='')
+    //-     .img-group-item
+    //-       a(href='https://fe32.top/')
+    //-         img(src='https://bu.dusays.com/2022/05/02/626f92e193879.jpg' alt='')
+    //-     .img-group-item
+    //-       a(href='https://fe32.top/')
+    //-         img(src='https://bu.dusays.com/2022/05/02/626f92e193879.jpg' alt='')
+    //-     .img-group-item
+    //-       a(href='https://fe32.top/')
+    //-         img(src='https://bu.dusays.com/2022/05/02/626f92e193879.jpg' alt='')
+    //-     .img-group-item
+    //-       a(href='https://fe32.top/')
+    //-         img(src='https://bu.dusays.com/2022/05/02/626f92e193879.jpg' alt='')
+  if theme.footer.owner.enable
+    - var now = new Date()
+    - var nowYear = now.getFullYear()
+    if theme.footer.owner.since && theme.footer.owner.since != nowYear
+      .copyright!= `&copy;${theme.footer.owner.since} - ${nowYear + ' '} <i id="heartbeat" class="fa fas fa-heartbeat"></i> ${config.author}`
+    else
+      .copyright!= `&copy;${nowYear + ' '} <i id="heartbeat" class="fa fas fa-heartbeat"></i> ${config.author}`
+  //- if theme.footer.copyright
+  //-   .framework-info
+  //-     span= _p('footer.framework') + ' '
+  //-     a(href='https://hexo.io')= 'Hexo'
+  //-     span.footer-separator |
+  //-     span= _p('footer.theme') + ' '
+  //-     a(href='https://github.com/jerryc127/hexo-theme-butterfly')= 'Butterfly'
+  //- if theme.footer.custom_text
+  //-   .footer_custom_text!=`${theme.footer.custom_text}`

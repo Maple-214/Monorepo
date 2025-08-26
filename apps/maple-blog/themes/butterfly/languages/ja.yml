@@ -1,0 +1,124 @@
+footer:
+  framework: フレームワーク
+  theme: テーマ
+
+copy:
+  success: コピー成功
+  error: コピーエラー
+  noSupport: ブラウザがサポートされていません
+
+page:
+  articles: 記事一覧
+  tag: タグ
+  category: カテゴリ
+  archives: アーカイブ
+
+card_post_count: 件のコメント
+
+no_title: タイトルなし
+
+post:
+  created: 投稿日
+  updated: 更新日
+  wordcount: 単語数
+  min2read: 読むのにかかる時間
+  min2read_unit: 分
+  page_pv: 読まれた回数
+  comments: コメント数
+  copyright:
+    author: 著者
+    link: 記事リンク
+    copyright_notice: 著作権声明
+    copyright_content: '特に声明がない限り、このブログのすべての記事は
+      <a href="%s" target="_blank">%s</a> ライセンスで提供されています。転載する際は、<a href="%s" target="_blank">%s</a> からの引用であることを明示してください！'
+  recommend: 関連記事
+  edit: 編集
+
+search:
+  title: 検索
+  load_data: データベースの読み込み中
+  algolia_search:
+    input_placeholder: 記事を検索
+    hits_empty: "検索結果が見つかりませんでした: ${query}"
+    hits_stats: "${hits} 件の結果が見つかりました、時間: ${time} ミリ秒"
+
+  local_search:
+    input_placeholder: 記事を検索
+    hits_empty: "検索結果が見つかりませんでした: ${query}"
+    hits_stats: "合計 ${hits} 件の記事が見つかりました"
+
+pagination:
+  prev: 前の記事
+  next: 次の記事
+
+comment: コメント
+
+aside:
+  articles: 記事
+  tags: タグ
+  categories: カテゴリ
+  card_announcement: お知らせ
+  card_categories: カテゴリ
+  card_tags: タグ
+  card_archives: アーカイブ
+  card_recent_post: 最新記事
+  card_webinfo:
+    headline: サイト情報
+    article_name: 記事数
+    runtime:
+      name: 稼働時間
+      unit: 日
+    last_push_date:
+      name: 最終更新日
+    site_wordcount: サイト総文字数
+    site_uv_name: サイト訪問者数
+    site_pv_name: サイト総訪問数
+  more_button: もっと見る
+  card_newest_comments:
+    headline: 最新コメント
+    loading_text: ロード中...
+    error: コメントを取得できませんでした。関連する設定が正しいか確認してください
+    zero: コメントはありません
+    image: 画像
+    link: リンク
+    code: コード
+  card_toc: 目次
+  card_post_series: シリーズ記事
+
+date_suffix:
+  just: たった今
+  min: 分前
+  hour: 時間前
+  day: 日前
+  month: か月前
+
+donate: 寄付
+share: 共有
+
+rightside:
+  readmode_title: 読み取りモード
+  translate_title: 簡繁体変換
+  night_mode_title: 明るいモードと暗いモードの切り替え
+  back_to_top: トップに戻る
+  toc: 目次
+  scroll_to_comment: コメントまでスクロール
+  setting: 設定
+  aside: シングルカラムとダブルカラムの切り替え
+  chat: チャット
+
+copy_copyright:
+  author: 作者
+  link: リンク
+  source: 出典
+  info: 著作権は作者に帰属します。商業利用の場合は作者に連絡して許可を得てください。非商業利用の場合は出典を明記してください。
+
+Snackbar:
+  chs_to_cht: 簡体字中国語に切り替えました
+  cht_to_chs: 繁体字中国語に切り替えました
+  day_to_night: ダークモードに切り替えました
+  night_to_day: ライトモードに切り替えました
+
+loading: 読み込み中...
+load_more: もっと読み込む
+
+error404: ページが見つかりません

@@ -30,6 +30,7 @@ jobs:
           docker build -t maple214/web:${{ github.event.inputs.tag }} -f apps/web/Dockerfile . --build-arg BUILDKIT_INLINE_CACHE=1
           docker build -t maple214/app1:${{ github.event.inputs.tag }} -f apps/app1/Dockerfile . --build-arg BUILDKIT_INLINE_CACHE=1
           docker build -t maple214/app2:${{ github.event.inputs.tag }} -f apps/app2/Dockerfile . --build-arg BUILDKIT_INLINE_CACHE=1
+          docker build -t maple214/maple-blog:${{ github.event.inputs.tag }} -f apps/maple-blog/Dockerfile . --build-arg BUILDKIT_INLINE_CACHE=1
 
       - name: Push Docker images
         run: |
@@ -38,3 +39,4 @@ jobs:
           docker push maple214/web:${{ github.event.inputs.tag }}
           docker push maple214/app1:${{ github.event.inputs.tag }}
           docker push maple214/app2:${{ github.event.inputs.tag }}
+          docker push maple214/maple-blog:${{ github.event.inputs.tag }}

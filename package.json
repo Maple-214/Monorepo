@@ -35,15 +35,18 @@
     "prettier": "^3.2.5",
     "turbo": "^2.0.0",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.40.0"
+    "typescript-eslint": "^8.40.0",
+    "@types/react": "^18.2.74",
+    "@types/react-dom": "^18.2.24"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "eslint --fix",
+      "eslint --fix --ignore-pattern \"apps/maple-blog/**\"",
       "prettier --write"
     ],
     "*.{json,md,css}": [
       "prettier --write"
-    ]
+    ],
+    "apps/maple-blog/**/*.{js,jsx,ts,tsx}": []
   }
 }

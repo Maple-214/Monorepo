@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import RemoteApp1 from './RemoteApp1';
 import RemoteApp2 from './RemoteApp2';
+import { DocsPage } from './components/docs';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { AdvancedCacheDemo } from './components/cachdemo';
 
@@ -37,6 +38,20 @@ const navItems = [
   {
     path: '/app2',
     label: '子应用 App2',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+        />
+      </svg>
+    ),
+  },
+  {
+    path: '/docs',
+    label: '泽枫的空间',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
@@ -201,10 +216,7 @@ const Navigation: React.FC = () => {
 
       {/* 移动端菜单遮罩 */}
       {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-25 z-40 md:hidden"
-          onClick={closeMobileMenu}
-        />
+        <div className="fixed inset-0  bg-opacity-25 z-40 md:hidden" onClick={closeMobileMenu} />
       )}
     </>
   );
@@ -276,6 +288,13 @@ const App2Page: React.FC = () => (
   </PageContainer>
 );
 
+const DocsPages: React.FC = () => (
+  <PageContainer breadcrumbs={[{ label: '文档' }]}>
+    <div className="micro-app-wrapper min-h-[600px]">
+      <DocsPage />
+    </div>
+  </PageContainer>
+);
 // 主应用组件
 export const App: React.FC = () => {
   return (
@@ -287,6 +306,7 @@ export const App: React.FC = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/app1" element={<App1Page />} />
             <Route path="/app2" element={<App2Page />} />
+            <Route path="/docs" element={<DocsPages />} />
           </Routes>
         </main>
 

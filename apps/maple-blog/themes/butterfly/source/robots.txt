@@ -1,0 +1,27 @@
+# robots.txt for example.com
+
+User-agent: *
+Disallow: /private/      # 阻止爬虫访问 /private/ 目录下的页面
+Disallow: /restricted/   # 阻止爬虫访问 /restricted/ 目录下的页面
+
+# Allow Googlebot access to specific parts of the site
+# User-agent: Googlebot
+Allow: /public/         # 允许Googlebot访问 /public/ 目录下的页面
+
+# Crawl-delay: 10        # 指定爬虫爬取的时间间隔，这里设置为10秒
+
+
+# 以下是一些通用的指令，根据需要启用或禁用
+ Disallow: /cgi-bin/
+ Disallow: /images/
+ Disallow: /tmp/
+ Disallow: /docs/
+ Disallow: /downloads/
+ Disallow: /archives/
+ Disallow: /js/
+ Disallow: /css/
+ Disallow: /fonts/
+ Disallow: /fancybox/
+
+Sitemap: https://maple-214.cn/sitemap.xml # 提供站点地图的位置
+Sitemap: https://maple-214.cn/baidusitemap.xml
