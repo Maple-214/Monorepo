@@ -1,0 +1,39 @@
+name: Build & Push App2 to Aliyun
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Docker image tag'
+        required: true
+        default: 'latest'
+
+jobs:
+  docker-build-app2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Docker image (app2)
+        run: |
+          docker build -t ${{ secrets.ALIYUN_REGISTRY }}/maple_214/app2:${{ github.event.inputs.tag }} -f apps/app2/Dockerfile .
+
+      - name: Login to Aliyun Registry
+        run: |
+          echo "${{ secrets.ALIYUN_PASSWORD }}" | docker login --username=${{ secrets.ALIYUN_USERNAME }} --password-stdin ${{ secrets.ALIYUN_REGISTRY }}
+
+      - name: Push image
+        run: docker push ${{ secrets.ALIYUN_REGISTRY }}/maple_214/app2:${{ github.event.inputs.tag }}
