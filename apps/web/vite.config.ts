@@ -6,23 +6,31 @@ import { remotes } from './mf/remote';
 
 export default defineConfig(({ command, mode }) => {
   const isDev = command === 'serve';
+  const isTest = mode === 'test'; // 👈 Vitest 会注入 mode=test
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
     plugins: [
       react(),
-      federation({
-        name: 'web',
-        // ✅ 静态声明 remotes（开发期最稳）
-        remotes: remotes(env),
-        shared: {
-          react: { singleton: true, requiredVersion: '^18.0.0' },
-          'react-dom': { singleton: true, requiredVersion: '^18.0.0' },
-        },
-      }),
-    ],
+      !isTest &&
+        federation({
+          name: 'web',
+          remotes: remotes(env),
+          shared: {
+            react: { singleton: true, requiredVersion: '^18.0.0' },
+            'react-dom': { singleton: true, requiredVersion: '^18.0.0' },
+          },
+        }),
+    ].filter(Boolean),
     resolve: {
       alias: {
+        ...(isTest
+          ? {
+              // 👇 测试环境下把 app1/App 指向一个 mock
+              'app1/App': path.resolve(__dirname, 'test/mocks/MockApp1.tsx'),
+              'app2/App': path.resolve(__dirname, 'test/mocks/MockApp2.tsx'),
+            }
+          : {}),
         '@acme/ui': isDev
           ? path.resolve(__dirname, '../../packages/ui/src')
           : path.resolve(__dirname, '../../packages/ui/dist'),
@@ -33,26 +41,23 @@ export default defineConfig(({ command, mode }) => {
     },
     server: {
       port: 5173,
-      // 关键：把 /docs/* 代理到 VitePress dev server，并且 **去掉 /docs 前缀**
-      // proxy: {
-      //   '/docs': {
-      //     target: 'http://localhost:5003',
-      //     changeOrigin: true,
-      //     // 去掉 /docs 前缀 -> 转发到 VitePress 的根路径
-      //     rewrite: (path) => path.replace(/^\/docs/, ''),
-      //     // 可选：配置请求头，确保远端服务按预期识别
-      //     configure: (proxy) => {
-      //       proxy.on('proxyReq', (proxyReq, req) => {
-      //         // 标记来源，若需要在 VitePress side 做特殊处理可以读取
-      //         proxyReq.setHeader('x-forwarded-host', req.headers.host || '');
-      //         proxyReq.setHeader('x-forwarded-proto', 'http');
-      //       });
-      //     }
-      //   }
-      // }
     },
     build: { outDir: 'dist', sourcemap: isDev, target: 'es2022' },
     optimizeDeps: { include: [] },
     cacheDir: '../../node_modules/.vite',
+    test: {
+      globals: true, // 让 describe/it/expect 生效
+      environment: 'jsdom', // 支持 React DOM 测试
+      setupFiles: './test/setup.ts', // 测试前的初始化文件
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'json', 'html'],
+      },
+      server: {
+        deps: {
+          inline: ['app1/App', 'app2/App'],
+        },
+      },
+    },
   };
 });
