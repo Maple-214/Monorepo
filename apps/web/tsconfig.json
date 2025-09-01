@@ -1,7 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
-  "exclude": ["test", "**/*.test.ts", "**/*.test.tsx"], // 添加排除项
   "compilerOptions": {
+    "jsx": "react-jsx",
+    "types": ["vitest/globals"],
     "baseUrl": ".",
     "paths": {
       "@acme/ui": ["../../packages/ui/src"],
