@@ -5,8 +5,8 @@
     "types": ["vitest/globals"],
     "baseUrl": ".",
     "paths": {
-      "@acme/ui": ["../../packages/ui/src"],
-      "@acme/utils": ["../../packages/utils/src"]
+      "@anmx/ui": ["../../packages/ui/src"],
+      "@anmx/utils": ["../../packages/utils/src"]
     }
   }
 }

@@ -13,8 +13,8 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "@acme/ui": "workspace:*",
-    "@acme/utils": "workspace:*"
+    "@anmx/ui": "workspace:*",
+    "@anmx/utils": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
