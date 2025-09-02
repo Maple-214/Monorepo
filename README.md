@@ -49,7 +49,7 @@ pnpm build --filter web
 构建某个子包（例如 ui）：
 
 ```bash
-pnpm build --filter @acme/ui
+pnpm build --filter @anmx/ui
 ```
 
 ---
@@ -194,8 +194,8 @@ pnpm publish -r
 ```ts
 resolve: {
   alias: {
-    "@acme/ui": path.resolve(__dirname, "../../packages/ui/src"),
-    "@acme/utils": path.resolve(__dirname, "../../packages/utils/src"),
+    "@anmx/ui": path.resolve(__dirname, "../../packages/ui/src"),
+    "@anmx/utils": path.resolve(__dirname, "../../packages/utils/src"),
   },
 },
 ```
@@ -243,7 +243,7 @@ resolve: {
 
 ## ❓ FAQ（常见问题排查）
 
-### 1. 启动时提示 `Failed to resolve entry for package "@acme/ui"`
+### 1. 启动时提示 `Failed to resolve entry for package "@anmx/ui"`
 
 原因：Vite 找不到包的入口文件。  
 解决方法：
@@ -251,7 +251,7 @@ resolve: {
 - 确认 `apps/web/vite.config.ts` 的 alias 已经正确指向 `../../packages/ui/src`
 - 如果是生产构建，请先构建 `ui` 包：
   ```bash
-  pnpm build --filter @acme/ui
+  pnpm build --filter @anmx/ui
   ```
 
 ---
@@ -358,7 +358,7 @@ resolve: {
 ### 9. 如何只运行某个包的测试？
 
 ```bash
-pnpm test --filter @acme/utils
+pnpm test --filter @anmx/utils
 ```
 
 ---
@@ -368,4 +368,11 @@ pnpm test --filter @acme/utils
 ```bash
 pnpm store prune
 pnpm install --force
+```
+
+## 11.公共库package发版步骤
+
+```bash
+本地发版命令：
+pnpm changeset → pnpm changeset version → pnpm build → pnpm changeset publish
 ```

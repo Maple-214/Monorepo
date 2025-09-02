@@ -14,8 +14,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@acme/ui": "workspace:*",
-    "@acme/utils": "workspace:*",
+    "@anmx/ui": "workspace:*",
+    "@anmx/utils": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.8.1"

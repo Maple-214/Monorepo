@@ -25,8 +25,8 @@ export default defineConfig(({ command }) => {
     server: { port: 5001, cors: true },
     resolve: {
       alias: {
-        '@acme/ui': path.resolve(__dirname, '../../packages/ui/src'),
-        '@acme/utils': path.resolve(__dirname, '../../packages/utils/src'),
+        '@anmx/ui': path.resolve(__dirname, '../../packages/ui/src'),
+        '@anmx/utils': path.resolve(__dirname, '../../packages/utils/src'),
       },
     },
   };

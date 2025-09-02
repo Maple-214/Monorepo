@@ -31,10 +31,10 @@ export default defineConfig(({ command, mode }) => {
               'app2/App': path.resolve(__dirname, 'test/mocks/MockApp2.tsx'),
             }
           : {}),
-        '@acme/ui': isDev
+        '@anmx/ui': isDev
           ? path.resolve(__dirname, '../../packages/ui/src')
           : path.resolve(__dirname, '../../packages/ui/dist'),
-        '@acme/utils': isDev
+        '@anmx/utils': isDev
           ? path.resolve(__dirname, '../../packages/utils/src')
           : path.resolve(__dirname, '../../packages/utils/dist'),
       },

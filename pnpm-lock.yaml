@@ -77,10 +77,10 @@ importers:
 
   apps/app1:
     dependencies:
-      '@acme/ui':
+      '@anmx/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@acme/utils':
+      '@anmx/utils':
         specifier: workspace:*
         version: link:../../packages/utils
       react:
@@ -108,10 +108,10 @@ importers:
 
   apps/app2:
     dependencies:
-      '@acme/ui':
+      '@anmx/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@acme/utils':
+      '@anmx/utils':
         specifier: workspace:*
         version: link:../../packages/utils
       react:
@@ -217,10 +217,10 @@ importers:
 
   apps/web:
     dependencies:
-      '@acme/ui':
+      '@anmx/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@acme/utils':
+      '@anmx/utils':
         specifier: workspace:*
         version: link:../../packages/utils
       react:
@@ -272,6 +272,24 @@ importers:
       vite:
         specifier: ^5.2.8
         version: 5.4.19(@types/node@20.19.11)(lightningcss@1.30.1)(stylus@0.64.0)
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@20.19.11)(@vitest/ui@3.2.4)(jsdom@26.1.0)(lightningcss@1.30.1)(stylus@0.64.0)
+
+  packages/request:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.0
+        version: 20.19.11
+      '@vitest/coverage-v8':
+        specifier: ^3.2.4
+        version: 3.2.4(vitest@3.2.4(@types/node@20.19.11)(@vitest/ui@3.2.4)(jsdom@26.1.0)(lightningcss@1.30.1)(stylus@0.64.0))
+      '@vitest/ui':
+        specifier: ^3.2.4
+        version: 3.2.4(vitest@3.2.4)
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.2
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@20.19.11)(@vitest/ui@3.2.4)(jsdom@26.1.0)(lightningcss@1.30.1)(stylus@0.64.0)

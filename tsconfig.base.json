@@ -13,8 +13,8 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@acme/ui": ["packages/ui/src"],
-      "@acme/utils": ["packages/utils/src"]
+      "@anmx/ui": ["packages/ui/src"],
+      "@anmx/utils": ["packages/utils/src"]
     }
   },
   "exclude": ["node_modules", "dist"],
