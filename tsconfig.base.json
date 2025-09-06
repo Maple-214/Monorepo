@@ -14,7 +14,9 @@
     "baseUrl": ".",
     "paths": {
       "@anmx/ui": ["packages/ui/src"],
-      "@anmx/utils": ["packages/utils/src"]
+      "@anmx/utils": ["packages/utils/src"],
+      "@anmx/vite-plugin-preamble": ["packages/vite-plugin-preamble/src"],
+      "@anmx/request": ["packages/request/src"]
     }
   },
   "exclude": ["node_modules", "dist"],

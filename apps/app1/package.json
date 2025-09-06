@@ -8,19 +8,21 @@
     "build": "vite build",
     "serve": "vite preview --port 5001 --strictPort",
     "watch": "vite build --watch --mode development",
-    "watch:serve": "concurrently \"pnpm watch\" \"http-server ./dist -p 5001 --cors\""
+    "watch:serve": "concurrently \"pnpm watch\" \"http-server ./dist -p 5001 --cors\"",
+    "debug:preamble": "PREAMBLE_DEBUG=true vite dev --port 5001"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "@anmx/ui": "workspace:*",
-    "@anmx/utils": "workspace:*"
+    "@anmx/utils": "workspace:*",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.2.1",
-    "typescript": "^5.4.5",
-    "vite": "^5.2.8",
+    "@anmx/vite-plugin-preamble": "1.0.0-beta.1",
+    "@babel/preset-react": "^7.24.0",
+    "concurrently": "^8.2.2",
     "http-server": "^14.1.1",
-    "concurrently": "^8.2.2"
+    "typescript": "^5.4.5",
+    "vite": "^5.2.8"
   }
 }

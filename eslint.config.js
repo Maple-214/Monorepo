@@ -45,6 +45,7 @@ export default tseslint.config(
       '**/vite.config.js', // 匹配任意层级的 vite.config.js
       'eslint.config.js', // 排除 ESLint 配置文件本身
       '**/eslint.config.js', // 如果是 monorepo，排除所有层级的 ESLint 配置文件
+      '**/preamble-debug.js', // 忽略 preamble-debug.js 文件
     ],
   },
 );

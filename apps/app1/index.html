@@ -3,9 +3,60 @@
   <head>
     <meta charset="UTF-8" />
     <title>App1 子应用</title>
+    <!-- 核心preamble初始化脚本，必须最先加载 -->
+    <script>
+      // 确保在任何React代码之前定义必要的全局变量
+      window.__vite_plugin_react_preamble__ = true;
+      window.defineReactRefreshBoundary = window.defineReactRefreshBoundary || (fn => fn);
+      
+      // 为远程模块联邦场景设置额外的环境变量
+      window.__FEDERATION_PREPARED__ = true;
+      window.__VITE_PROJECT_NAME__ = 'app1';
+      window.__VITE_BASE_PATH__ = '/';
+    </script>
+    
+    <!-- Preamble调试辅助脚本 -->
+    <script type="module" src="/preamble-debug.js"></script>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/bootstrap.tsx"></script>
+    <!-- 异步加载应用入口，确保preamble完全初始化 -->
+    <script type="module">
+      // 等待DOM加载完成并确保preamble环境准备就绪
+      document.addEventListener('DOMContentLoaded', async () => {
+        try {
+          // 检查并修复preamble环境
+        if (window.PreambleDebugger) {
+          try {
+            const status = window.PreambleDebugger.checkPreambleEnvironment();
+            console.log('[Preamble Status]', status);
+            if (!status.hasPreamble) {
+              console.info('[Preamble Info] Attempting to fix preamble environment...');
+              window.PreambleDebugger.fixPreambleEnvironment();
+              
+              // 再次检查状态
+              const newStatus = window.PreambleDebugger.checkPreambleEnvironment();
+              if (newStatus.hasPreamble) {
+                console.log('[Preamble Success] Environment has been fixed!');
+              }
+            }
+          } catch (error) {
+            console.error('[Preamble Debug Error]', error);
+          }
+        }
+          
+          // 延迟加载bootstrap以确保所有preamble设置完成
+          setTimeout(() => {
+            import('/src/bootstrap.tsx').catch(err => {
+              console.error('Failed to load bootstrap:', err);
+              document.getElementById('root').innerHTML = 
+                '<div style="padding: 20px; color: red;">加载应用失败，请刷新页面重试。</div>';
+            });
+          }, 50);
+        } catch (error) {
+          console.error('Error during app initialization:', error);
+        }
+      });
+    </script>
   </body>
 </html>
