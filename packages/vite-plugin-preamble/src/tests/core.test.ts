@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createPreamblePlugin } from '../src/core';
+import { createPreamblePlugin } from '../core';
 
 // Mock console.log
 const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});

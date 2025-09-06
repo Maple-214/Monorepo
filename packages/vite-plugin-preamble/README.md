@@ -147,7 +147,7 @@ export default defineConfig({
 ```bash
 # 克隆仓库
 git clone https://github.com/Maple-214/Monorepo.git
-cd Monorepo
+cd Monorepo/packages/@anmx/vite-plugin-preamble
 
 # 安装依赖
 pnpm install
@@ -164,4 +164,4 @@ pnpm -F @anmx/vite-plugin-preamble test:coverage
 
 ## License
 
-MIT License © 2024
+MIT License © 2025 [Maple-214](https://github.com/Maple-214)
