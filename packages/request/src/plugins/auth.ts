@@ -1,10 +1,9 @@
-import { requestInterceptors, responseInterceptors } from '../core';
-import type { RequestOptions } from '../core';
+import { requestInterceptors, responseInterceptors } from '../interceptors';
 
 let refreshing = false;
 
 export function setupAuthPlugin(refreshFn: () => Promise<string>) {
-  // 请求拦截：自动加 token
+  // 请求拦截：加 token
   requestInterceptors.use(async (url, options) => {
     const token = localStorage.getItem('token');
     return [
@@ -20,17 +19,13 @@ export function setupAuthPlugin(refreshFn: () => Promise<string>) {
   });
 
   // 响应拦截：处理 401
-  responseInterceptors.use(async (res: unknown, url: string, options: RequestOptions) => {
-    // ⚠️ 注意这里强转
-    const data = res as { code?: number };
-
-    if (data?.code === 401 && !refreshing) {
+  responseInterceptors.use(async (res: any, url, options) => {
+    if (res?.code === 401 && !refreshing) {
       refreshing = true;
       const newToken = await refreshFn();
       localStorage.setItem('token', newToken);
       refreshing = false;
 
-      // 重试请求
       const retryRes = await fetch(url, {
         ...options,
         headers: {
@@ -40,7 +35,6 @@ export function setupAuthPlugin(refreshFn: () => Promise<string>) {
       });
       return retryRes.json();
     }
-
     return res;
   });
 }

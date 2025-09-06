@@ -1,9 +1,11 @@
 {
   "name": "@anmx/request",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/types/index.d.ts",
+  "license": "MIT",
+  "homepage": "https://github.com/Maple-214/Monorepo/tree/master/packages/request",
   "exports": {
     ".": {
       "import": "./dist/index.js",

@@ -1,117 +1,147 @@
-// packages/sdk/src/core.ts
+import { requestInterceptors, responseInterceptors } from './interceptors';
+import type { RequestOptions, SDKError } from './types';
 
-export interface RequestOptions extends RequestInit {
-  cacheTime?: number; // 缓存时间，毫秒，默认 0 = 不缓存
-  dedupeKey?: string; // 请求去重 key，默认 url+method+body
-}
-
-export interface SDKError extends Error {
-  status?: number;
-  url?: string;
-}
-
-// ------------------ 缓存 ------------------
-interface CacheEntry<T> {
-  data: T;
+// ---------- 缓存实现 ----------
+interface CacheEntry {
+  data: unknown;
   expireAt: number;
 }
+const cache = new Map<string, CacheEntry>();
 
-const cache = new Map<string, CacheEntry<unknown>>();
-
-function getCache<T>(key: string): T | undefined {
+export function _getCache<T>(key: string): T | undefined {
   const entry = cache.get(key);
-  if (entry && entry.expireAt > Date.now()) {
-    return entry.data as T;
-  }
+  if (!entry) return undefined;
+  if (entry.expireAt > Date.now()) return entry.data as T;
   cache.delete(key);
   return undefined;
 }
-
-function setCache<T>(key: string, data: T, ttl: number) {
+export function _setCache<T>(key: string, data: T, ttl: number) {
   cache.set(key, { data, expireAt: Date.now() + ttl });
 }
-
-// ------------------ 请求去重 ------------------
-const inflight = new Map<string, Promise<unknown>>();
-
-// ------------------ 拦截器 ------------------
-type RequestInterceptor = (
-  url: string,
-  options: RequestOptions,
-) => Promise<[string, RequestOptions]> | [string, RequestOptions];
-
-type ResponseInterceptor<T> = (response: T, url: string, options: RequestOptions) => Promise<T> | T;
-
-class InterceptorManager<T> {
-  private handlers: Array<T> = [];
-  use(handler: T) {
-    this.handlers.push(handler);
-  }
-  getHandlers() {
-    return this.handlers;
-  }
+export function _clearCache(key?: string) {
+  if (key) cache.delete(key);
+  else cache.clear();
 }
 
-export const requestInterceptors = new InterceptorManager<RequestInterceptor>();
-export const responseInterceptors = new InterceptorManager<ResponseInterceptor<unknown>>();
+// ---------- inflight 去重 ----------
+const inflight = new Map<string, Promise<unknown>>();
 
-// ------------------ 主请求方法 ------------------
-export async function request<T = unknown>(url: string, options: RequestOptions = {}): Promise<T> {
-  const { cacheTime = 0, method = 'GET' } = options;
+// ---------- 工具：延时 ----------
+function sleep(ms: number) {
+  return new Promise((res) => setTimeout(res, ms));
+}
 
-  const dedupeKey = options.dedupeKey || `${method}:${url}:${JSON.stringify(options.body || {})}`;
+// ---------- 主请求函数 ----------
+export async function request<T = unknown>(
+  inputUrl: string,
+  options: RequestOptions = {},
+): Promise<T> {
+  const {
+    cacheTime = 0,
+    method = 'GET',
+    timeout,
+    retry = 0,
+    retryDelay = 300,
+    dedupe = true,
+  } = options;
 
-  // 缓存
-  if (cacheTime > 0) {
-    const cached = getCache<T>(dedupeKey);
-    if (cached) return cached;
+  const dedupeKey =
+    options.dedupeKey ?? `${method}:${inputUrl}:${JSON.stringify(options.body ?? {})}`;
+
+  // 缓存逻辑
+  if (cacheTime > 0 && !options.forceRefresh) {
+    const cached = _getCache<T>(dedupeKey);
+    if (cached !== undefined) return cached;
   }
 
-  // 请求去重
-  if (inflight.has(dedupeKey)) {
+  // 去重
+  if (dedupe && inflight.has(dedupeKey)) {
     return inflight.get(dedupeKey)! as Promise<T>;
   }
 
-  // 应用请求拦截器
-  let finalUrl = url;
-  let finalOpts: RequestOptions = { ...options };
+  // 应用请求拦截器（可能修改 url/options）
+  let finalUrl = inputUrl;
+  let finalOpts: RequestOptions = { ...options, method };
+
   for (const interceptor of requestInterceptors.getHandlers()) {
-    [finalUrl, finalOpts] = await interceptor(finalUrl, finalOpts);
+    const res = await interceptor(finalUrl, finalOpts);
+    finalUrl = res[0];
+    finalOpts = res[1];
   }
 
-  const fetchPromise = (async () => {
+  // retry loop
+  let attempts = 0;
+  const maxAttempts = Math.max(1, retry + 1);
+  const doFetch = async (): Promise<T> => {
+    attempts++;
+    let controller: AbortController | undefined;
+    let signal = finalOpts.signal;
+    if (typeof timeout === 'number' && timeout > 0) {
+      controller = new AbortController();
+      signal = controller.signal;
+      const timer = setTimeout(() => controller?.abort(), timeout);
+      if (typeof (timer as any).unref === 'function') {
+        (timer as any).unref();
+      }
+    }
+
     try {
-      const res = await fetch(finalUrl, finalOpts);
+      const res = await fetch(finalUrl, { ...finalOpts, signal } as RequestInit);
+
+      // 尝试解析 JSON（若不是 JSON 则捕获）
+      let parsed: unknown = undefined;
+      try {
+        parsed = await res.clone().json();
+      } catch {
+        // not json, we still proceed. parsed remains undefined.
+      }
+
+      // 运行响应拦截器（插件可以在这里进行 token 刷新并返回新的数据）
+      let finalData: unknown = parsed;
+      for (const rInter of responseInterceptors.getHandlers()) {
+        finalData = await rInter(finalData, finalUrl, finalOpts);
+      }
 
       if (!res.ok) {
-        const error: SDKError = new Error(`Request failed with status ${res.status}`);
-        error.status = res.status;
-        error.url = finalUrl;
-        throw error;
+        const err: SDKError = new Error(`Request failed with status ${res.status}`) as SDKError;
+        err.status = res.status;
+        err.url = finalUrl;
+        err.data = finalData;
+        throw err;
       }
 
-      const data = (await res.json()) as T;
+      // 缓存
+      if (cacheTime > 0) _setCache<T>(dedupeKey, finalData as T, cacheTime);
 
-      // 应用响应拦截器
-      let finalData = data as T;
-      for (const interceptor of responseInterceptors.getHandlers()) {
-        finalData = (await interceptor(finalData, finalUrl, finalOpts)) as T;
+      return finalData as T;
+    } catch (err) {
+      // 网络错误或解析错误
+      if (attempts < maxAttempts) {
+        // exponential backoff
+        const wait = retryDelay * Math.pow(2, attempts - 1);
+        await sleep(wait);
+        return doFetch();
       }
+      throw err;
+    } finally {
+      // inflight 清理在外层完成
+    }
+  };
 
-      if (cacheTime > 0) setCache(dedupeKey, finalData, cacheTime);
-
-      return finalData;
+  const running = (async () => {
+    try {
+      const result = await doFetch();
+      return result;
     } finally {
       inflight.delete(dedupeKey);
     }
   })();
 
-  inflight.set(dedupeKey, fetchPromise);
-
-  return fetchPromise as Promise<T>;
+  inflight.set(dedupeKey, running as Promise<unknown>);
+  return running as Promise<T>;
 }
 
-// ------------------ 快捷方法 ------------------
+// ---------- 快捷方法 ----------
 export const http = {
   get: <T = unknown>(url: string, options?: RequestOptions) =>
     request<T>(url, { ...options, method: 'GET' }),
@@ -119,43 +149,16 @@ export const http = {
     request<T>(url, {
       ...options,
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json', ...(options?.headers ?? {}) },
+      body: typeof body === 'string' ? body : JSON.stringify(body ?? {}),
     }),
   put: <T = unknown>(url: string, body?: unknown, options?: RequestOptions) =>
     request<T>(url, {
       ...options,
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json', ...(options?.headers ?? {}) },
+      body: typeof body === 'string' ? body : JSON.stringify(body ?? {}),
     }),
   delete: <T = unknown>(url: string, options?: RequestOptions) =>
     request<T>(url, { ...options, method: 'DELETE' }),
 };
-
-// ------------------ OOP HttpClient ------------------
-export class HttpClient {
-  constructor(private baseUrl: string = '') {}
-
-  get<T = unknown>(path: string, options?: RequestOptions) {
-    return http.get<T>(this.baseUrl + path, options);
-  }
-
-  post<T = unknown>(path: string, body?: unknown, options?: RequestOptions) {
-    return http.post<T>(this.baseUrl + path, body, options);
-  }
-
-  put<T = unknown>(path: string, body?: unknown, options?: RequestOptions) {
-    return http.put<T>(this.baseUrl + path, body, options);
-  }
-
-  delete<T = unknown>(path: string, options?: RequestOptions) {
-    return http.delete<T>(this.baseUrl + path, options);
-  }
-}

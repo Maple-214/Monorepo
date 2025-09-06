@@ -374,5 +374,10 @@ pnpm install --force
 
 ```bash
 本地发版命令：
-pnpm changeset → pnpm changeset version → pnpm build → pnpm changeset publish
+pnpm changeset → pnpm changeset version → pnpm build --filter <package> → pnpm changeset publish
+pnpm changeset之后会在.changeset下生成记录md文件
+变更类型 (When writing changeset)	版本升级 (Version bump)	说明
+patch	1.0.0 -> 1.0.1	向后兼容的问题修复
+minor	1.0.0 -> 1.1.0	向后兼容的功能新增
+major	1.0.0 -> 2.0.0	不兼容的 API 变更 (这很可能就是你直接跳到 2.0.0 的原因)
 ```

@@ -5,14 +5,15 @@
     "declaration": true,
     "declarationDir": "dist/types",
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "module": "ESNext",
     "target": "ES2022",
     "moduleResolution": "Node",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "strict": true
+    "strict": true,
+    "types": ["vitest/globals"]
   },
-  "include": ["src"],
-  "exclude": ["tests", "dist", "node_modules"]
+  "include": ["src", "tests"],
+  "exclude": ["dist", "node_modules"]
 }
