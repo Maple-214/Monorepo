@@ -34,6 +34,11 @@ export default tseslint.config(
   },
   {
     ignores: [
+      'apps/maple-blog/**', // 忽略 maple-blog 目录下的所有文件
+      '**/dist/**', // 忽略所有dist目录
+      '**/node_modules/**', // 忽略node_modules目录
+      '**/.__mf__temp/**', // 忽略临时文件目录
+      'commitlint.config.cjs', // 忽略commitlint配置文件
       '**/postcss.config.js', // 匹配任意层级的 postcss.config.js
       '**/tailwind.config.js', // 匹配任意层级的 tailwind.config.js
       '**/webpack.config.js', // 匹配任意层级的 webpack.config.js

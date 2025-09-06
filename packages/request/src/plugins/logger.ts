@@ -1,22 +1,19 @@
-import { requestInterceptors, responseInterceptors } from '../core';
-import type { RequestOptions } from '../core';
+import { requestInterceptors, responseInterceptors } from '../interceptors';
+import type { RequestOptions } from '../types';
 
-/**
- * 日志插件：打印请求 & 响应
- */
-export function setupLoggerPlugin() {
-  // 请求日志
-  requestInterceptors.use((url: string, options: RequestOptions) => {
-    console.log(
-      `[SDK][Request] ${options.method || 'GET'} ${url}`,
-      options.body ? `\nBody: ${JSON.stringify(options.body)}` : '',
-    );
+export function setupLoggerPlugin(opts?: { level?: 'info' | 'debug' | 'warn' | 'error' }) {
+  const level = opts?.level ?? 'info';
+  requestInterceptors.use(async (url: string, options: RequestOptions) => {
+    if (level === 'debug' || level === 'info') {
+      console.debug(`[request] ${options.method ?? 'GET'} ${url}`);
+    }
     return [url, options];
   });
 
-  // 响应日志
-  responseInterceptors.use((res, url, options) => {
-    console.log(`[SDK][Response] ${options.method || 'GET'} ${url}`, '\nResponse:', res);
+  responseInterceptors.use(async (res: unknown, url: string) => {
+    if (level === 'debug') {
+      console.debug(`[response] ${url}`, res);
+    }
     return res;
   });
 }

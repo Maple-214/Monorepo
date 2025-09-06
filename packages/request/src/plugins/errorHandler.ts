@@ -1,24 +1,19 @@
-import { responseInterceptors } from '../core';
-import type { RequestOptions, SDKError } from '../core';
+import { responseInterceptors } from '../interceptors';
 
 /**
- * 全局错误处理插件
- * - 捕获接口异常并统一处理
- * - 可用于埋点/上报
+ * 简单错误标准化插件：当服务返回 { error, message } 等结构时转为抛出标准 SDKError
  */
-export function setupErrorHandlerPlugin(
-  handler: (error: SDKError, url: string, options: RequestOptions) => void,
-) {
-  responseInterceptors.use(async (res, url, options) => {
-    // 假设后端返回统一格式 { code: number, message: string, data: any }
-    if ((res as any)?.code && (res as any).code !== 0) {
-      const error: SDKError = new Error((res as any).message || 'Request error');
-      error.status = (res as any).code;
-      error.url = url;
-      handler(error, url, options);
-      throw error;
+export function setupErrorHandlerPlugin() {
+  responseInterceptors.use(async (res: unknown) => {
+    // 如果后端以成功响应但内含 error 字段，抛出
+    if (typeof res === 'object' && res !== null) {
+      const anyRes = res as any;
+      if (anyRes?.error || anyRes?.success === false) {
+        const e: any = new Error(anyRes?.message || 'API Error');
+        e.data = res;
+        throw e;
+      }
     }
-
     return res;
   });
 }
