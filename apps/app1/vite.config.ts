@@ -25,6 +25,10 @@ export default defineConfig(({ command }: ConfigEnv) => {
             singleton: true,
             requiredVersion: '^18.0.0',
           },
+          '@heroui/react': {
+            singleton: true,
+            requiredVersion: '^2.8.3',
+          },
         },
       }) as PluginOption,
     ],
@@ -34,6 +38,7 @@ export default defineConfig(({ command }: ConfigEnv) => {
       outDir: 'dist',
       minify: false,
       sourcemap: true,
+      cssCodeSplit: true, // ✅ 确保 CSS 单独打包
       rollupOptions: {
         output: {
           format: 'es' as const,

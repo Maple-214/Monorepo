@@ -1,10 +1,15 @@
 import React from 'react';
+import { HeroUIProvider } from '@heroui/react';
+import AppRoutes from './routes';
 
+/**
+ * 应用主组件
+ * 集成HeroUI和路由系统
+ */
 export default function App() {
   return (
-    <div style={{ padding: 20, background: '#f0f8ff' }}>
-      <h2>App1 子应用</h2>
-      <p>这是 App1 独立运行时的页面777。</p>
-    </div>
+    <HeroUIProvider>
+      <AppRoutes />
+    </HeroUIProvider>
   );
 }

@@ -1,4 +1,4 @@
-/* 导入Tailwind CSS基础样式和HeroUI主题 */
+/* 导入Tailwind CSS基础样式 */
 @import 'tailwindcss';
 @plugin './hero.ts';
 @source '../../node_modules/@heroui/theme/dist*.{js,ts,jsx,tsx}';

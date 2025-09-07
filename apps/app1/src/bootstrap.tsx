@@ -11,6 +11,9 @@ if (typeof window !== 'undefined') {
   window.defineReactRefreshBoundary = <T extends (...args: any[]) => any>(fn: T) => fn;
 }
 
+// 导入全局样式
+import './styles/global.css';
+
 // 导入React和ReactDOM
 import React from 'react';
 import ReactDOM from 'react-dom/client';
