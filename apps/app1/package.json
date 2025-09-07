@@ -14,12 +14,20 @@
   "dependencies": {
     "@anmx/ui": "workspace:*",
     "@anmx/utils": "workspace:*",
+    "@heroui/react": "^2.8.3",
+    "framer-motion": "^12.23.12",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.8.1"
   },
   "devDependencies": {
     "@anmx/vite-plugin-preamble": "1.0.0-beta.1",
+    "tailwindcss": "^4.1.12",
+    "@tailwindcss/postcss": "^4.1.12",
+    "postcss": "^8.5.6",
     "@babel/preset-react": "^7.24.0",
+    "@types/tailwindcss": "^3.1.0",
+    "autoprefixer": "^10.4.21",
     "concurrently": "^8.2.2",
     "http-server": "^14.1.1",
     "typescript": "^5.4.5",

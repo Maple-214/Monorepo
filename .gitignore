@@ -2,3 +2,4 @@ node_modules
 dist
 .turbo
 .__mf__temp
+tsconfig.tsbuildinfo
