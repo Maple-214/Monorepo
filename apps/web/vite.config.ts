@@ -19,6 +19,7 @@ export default defineConfig(({ command, mode }) => {
           shared: {
             react: { singleton: true, requiredVersion: '^18.0.0' },
             'react-dom': { singleton: true, requiredVersion: '^18.0.0' },
+            '@heroui/react': { singleton: true, requiredVersion: '^2.8.3' },
           },
         }),
     ].filter(Boolean),
@@ -42,7 +43,7 @@ export default defineConfig(({ command, mode }) => {
     server: {
       port: 5173,
     },
-    build: { outDir: 'dist', sourcemap: isDev, target: 'es2022' },
+    build: { outDir: 'dist', sourcemap: isDev, target: 'es2022', cssCodeSplit: true },
     optimizeDeps: { include: [] },
     cacheDir: '../../node_modules/.vite',
     test: {

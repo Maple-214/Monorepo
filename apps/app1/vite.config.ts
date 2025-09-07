@@ -1,6 +1,7 @@
 import { defineConfig, type PluginOption, type ConfigEnv } from 'vite';
 import { federation } from '@module-federation/vite';
 import { preamblePlugin } from '@anmx/vite-plugin-preamble';
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 import path from 'node:path';
 
 export default defineConfig(({ command }: ConfigEnv) => {
@@ -9,6 +10,11 @@ export default defineConfig(({ command }: ConfigEnv) => {
   return {
     base: isDev ? '/' : '/app1/',
     plugins: [
+      cssInjectedByJsPlugin({
+        jsAssetsFilterFunction: function customJsAssetsfilterFunction(outputChunk) {
+          return outputChunk.fileName == 'remoteEntry.js';
+        },
+      }),
       preamblePlugin,
       federation({
         name: 'app1',
@@ -25,6 +31,10 @@ export default defineConfig(({ command }: ConfigEnv) => {
             singleton: true,
             requiredVersion: '^18.0.0',
           },
+          '@heroui/react': {
+            singleton: true,
+            requiredVersion: '^2.8.3',
+          },
         },
       }) as PluginOption,
     ],
@@ -34,6 +44,7 @@ export default defineConfig(({ command }: ConfigEnv) => {
       outDir: 'dist',
       minify: false,
       sourcemap: true,
+      cssCodeSplit: false,
       rollupOptions: {
         output: {
           format: 'es' as const,
