@@ -2,7 +2,7 @@
 // 导入测试所需的工具函数
 import { screen } from '@testing-library/react';
 // 导入要测试的 App 组件
-import { App } from '../src/App';
+import { App } from '../src/App1';
 // 导入自定义的 render 函数（避免路由嵌套问题）
 import { render } from './test-utils';
 
