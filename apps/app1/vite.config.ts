@@ -10,11 +10,6 @@ export default defineConfig(({ command }: ConfigEnv) => {
   return {
     base: isDev ? '/' : '/app1/',
     plugins: [
-      cssInjectedByJsPlugin({
-        jsAssetsFilterFunction: function customJsAssetsfilterFunction(outputChunk) {
-          return outputChunk.fileName == 'remoteEntry.js';
-        },
-      }),
       preamblePlugin,
       federation({
         name: 'app1',
@@ -37,6 +32,14 @@ export default defineConfig(({ command }: ConfigEnv) => {
           },
         },
       }) as PluginOption,
+      cssInjectedByJsPlugin({
+        jsAssetsFilterFunction: (chunk) => {
+          const name = chunk.fileName || chunk.name || '';
+          return /remoteEntry(\.js)?$/.test(name) || name.includes('remoteEntry');
+        },
+        topExecutionPriority: true,
+        styleId: 'app1-css',
+      }),
     ],
     build: {
       target: 'esnext',

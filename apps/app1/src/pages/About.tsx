@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Card, Button, Avatar, Badge } from '@heroui/react';
+import { Card, Button, Avatar } from '@heroui/react';
 
 /**
  * 关于页面组件
@@ -77,12 +77,13 @@ const About: React.FC = () => {
                 key={index}
                 className="p-5 flex items-center gap-4 hover:shadow-md transition-all border border-gray-100 bg-white rounded-lg"
               >
-                <Avatar className={`${color.bg} ${color.text} w-12 h-12 text-xl`}>
-                  {tech.icon}
-                </Avatar>
-                <div className="flex-1">
+                <Avatar
+                  icon={tech.icon}
+                  className={`${color.bg} ${color.text} w-12 h-12 text-xl`}
+                />
+                <div className="flex-1 flex flex-col">
                   <h3 className="font-semibold text-gray-800">{tech.name}</h3>
-                  <Badge className="mt-1 bg-gray-100 text-gray-700">{tech.version}</Badge>
+                  <span className="text-sm text-gray-500 text-center">{tech.version}</span>
                 </div>
               </Card>
             );

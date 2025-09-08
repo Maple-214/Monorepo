@@ -1,6 +1,8 @@
 import React from 'react';
 import { HeroUIProvider } from '@heroui/react';
 import AppRoutes from './routes';
+// 导入全局样式
+import './styles/global.css';
 
 /**
  * 应用主组件
