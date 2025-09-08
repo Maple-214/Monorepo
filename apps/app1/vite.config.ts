@@ -1,6 +1,7 @@
 import { defineConfig, type PluginOption, type ConfigEnv } from 'vite';
 import { federation } from '@module-federation/vite';
 import { preamblePlugin } from '@anmx/vite-plugin-preamble';
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 import path from 'node:path';
 
 export default defineConfig(({ command }: ConfigEnv) => {
@@ -31,6 +32,14 @@ export default defineConfig(({ command }: ConfigEnv) => {
           },
         },
       }) as PluginOption,
+      cssInjectedByJsPlugin({
+        jsAssetsFilterFunction: (chunk) => {
+          const name = chunk.fileName || chunk.name || '';
+          return /remoteEntry(\.js)?$/.test(name) || name.includes('remoteEntry');
+        },
+        topExecutionPriority: true,
+        styleId: 'app1-css',
+      }),
     ],
     build: {
       target: 'esnext',
@@ -38,7 +47,7 @@ export default defineConfig(({ command }: ConfigEnv) => {
       outDir: 'dist',
       minify: false,
       sourcemap: true,
-      cssCodeSplit: true, // ✅ 确保 CSS 单独打包
+      cssCodeSplit: false,
       rollupOptions: {
         output: {
           format: 'es' as const,
