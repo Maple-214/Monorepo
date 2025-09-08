@@ -185,11 +185,8 @@ export default function Header({ isDark, toggleTheme }: HeaderProps) {
             );
           })}
           <div className="flex space-x-4 mt-4 pt-4 border-t border-gray-700">
-            <a href="#" className={iconClass}>
+            <a href={githubUrl} target="_blank" className={iconClass}>
               <Icons.Github />
-            </a>
-            <a href="#" className={iconClass}>
-              <Icons.Twitter />
             </a>
           </div>
         </div>

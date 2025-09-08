@@ -2,6 +2,7 @@ import React from 'react';
 import { Icons } from './IconSvgs';
 import styles from './HeroSection.module.styl';
 import clsx from 'clsx';
+import bannerSvg from './images/banner.svg';
 
 interface HeroSectionProps {
   isDark: boolean;
@@ -43,11 +44,7 @@ export default function HeroSection({ isDark }: HeroSectionProps) {
 
         {/* 主标题 */}
         <h1 className="text-3xl text-center md:text-7xl leading-tight">
-          <img
-            className="w-full h-full"
-            src="https://readme-typing-svg.herokuapp.com?font=Architects+Daughter&color=%2338C2FF&size=50&center=true&vCenter=true&height=100&width=600&lines=路漫漫+其修远兮~~~;吾将+上下+而求索!!!"
-            alt=""
-          />
+          <img className="w-full h-full" src={bannerSvg} alt="" />
           {/* <span className={`bg-clip-text text-transparent ${isDark
             ? "bg-gradient-to-r from-white via-gray-200 to-gray-400"
             : "bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900"
@@ -75,7 +72,7 @@ export default function HeroSection({ isDark }: HeroSectionProps) {
         <br />
 
         {/* CTA 按钮 */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex sm:flex-row gap-4 justify-center items-center">
           <a
             href={githubUrl}
             target="_blank"
@@ -89,13 +86,14 @@ export default function HeroSection({ isDark }: HeroSectionProps) {
           <a
             href={githubHome}
             target="_blank"
-            className={`px-8 py-3 rounded-lg font-semibold transition-all duration-300 border ${
+            className={`px-8 py-3 font-semibold transition-colors flex items-center space-x-2 rounded-lg border ${
               isDark
-                ? 'bg-gray-800 hover:bg-gray-700 text-white border-gray-600 hover:border-gray-500'
-                : 'bg-white hover:bg-gray-100 text-gray-900 border-gray-300 hover:border-gray-400'
+                ? 'text-gray-300 hover:text-white border-gray-700 hover:border-gray-500 bg-gray-800/50 hover:bg-gray-700/50'
+                : 'text-gray-600 hover:text-gray-900 border-gray-300 hover:border-gray-400 bg-gray-100 hover:bg-gray-200'
             }`}
           >
-            在 Github 上查看更多
+            <span>查看更多</span>
+            <Icons.ArrowRight />
           </a>
         </div>
 

@@ -31,7 +31,7 @@ export default function CTASection({ isDark }: CTASectionProps) {
           加入成为 Monorepo 的开发者， 开始使用 Monorepo
           架构来管理你的项目，来实现更快、更高效的构建。
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex sm:flex-row gap-4 justify-center items-center">
           <a
             href={githuburl}
             target="_blank"

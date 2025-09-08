@@ -60,12 +60,14 @@ export const App: React.FC = () => {
       <HeroUIProvider>
         <main className="flex-1">
           <Header isDark={isDark} toggleTheme={toggleTheme} />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/app1" element={<App1Page />} />
-            <Route path="/app2" element={<App2Page />} />
-            <Route path="/blog" element={<DocsPage />} />
-          </Routes>
+          <section className="container mt-16">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/app1" element={<App1Page />} />
+              <Route path="/app2" element={<App2Page />} />
+              <Route path="/blog" element={<DocsPage />} />
+            </Routes>
+          </section>
           <Footer isDark={isDark} />
         </main>
       </HeroUIProvider>
