@@ -1,0 +1,30 @@
+// 只修改滚动指示器部分，其他保持原样
+.scroll-indicator
+  width: 100%
+  display: flex
+  justify-content: center
+  padding: 1rem 0
+
+  @media (min-width: 768px)
+    position: absolute
+    bottom: 2rem
+    left: 0
+    right: 0
+    padding: 0
+
+// 如果需要，可以添加动画关键帧
+@keyframes bounce
+  0%, 100%
+    transform: translateY(-25%)
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1)
+  50%
+    transform: none
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1)
+
+// 确保动画类存在
+.animate-bounce
+  animation: bounce 1s infinite
+
+// 旋转类
+.chevron
+  transform: rotate(90deg)
