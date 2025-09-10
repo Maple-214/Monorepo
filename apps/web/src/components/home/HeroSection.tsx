@@ -13,7 +13,7 @@ const githubHome = 'https://github.com/Maple-214';
 export default function HeroSection({ isDark }: HeroSectionProps) {
   return (
     <section
-      className={`min-h-screen flex flex-col mt-16 items-center justify-center text-center px-6 ${
+      className={` flex flex-col mt-16 items-center justify-center text-center px-6 ${
         isDark ? 'bg-black text-white' : 'bg-gray-50 text-gray-900'
       } transition-colors duration-300`}
     >
@@ -43,7 +43,7 @@ export default function HeroSection({ isDark }: HeroSectionProps) {
         </div> */}
 
         {/* 主标题 */}
-        <h1 className="text-3xl text-center md:text-7xl leading-tight">
+        <h1 className="text-3xl text-center mt-16 md:text-7xl leading-tight">
           <img className="w-full h-full" src={bannerSvg} alt="" />
           {/* <span className={`bg-clip-text text-transparent ${isDark
             ? "bg-gradient-to-r from-white via-gray-200 to-gray-400"
@@ -99,7 +99,7 @@ export default function HeroSection({ isDark }: HeroSectionProps) {
 
         {/* 统计数据 */}
         <div
-          className={`grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 pt-16 ${
+          className={`grid md:grid-cols-3 gap-8 mt-16 pt-16 ${
             isDark ? 'border-t border-gray-800' : 'border-t border-gray-200'
           }`}
         >
