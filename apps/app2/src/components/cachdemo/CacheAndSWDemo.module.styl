@@ -1,0 +1,174 @@
+// src/components/CacheAndSWDemo.module.styl
+// 定义变量
+primary = #4361ee
+secondary = #3a0ca3
+success = #4cc9f0
+warning = #f72585
+light = #f8f9fa
+dark = #212529
+gray = #6c757d
+
+// 组件样式
+.container
+  max-width: 1200px
+  margin: 0 auto
+  background: white
+  border-radius: 12px
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1)
+  overflow: hidden
+
+.header
+  background: primary
+  color: white
+  padding: 2rem
+  text-align: center
+
+  h1
+    font-size: 2.5rem
+    margin-bottom: 1rem
+
+.subtitle
+  font-size: 1.2rem
+  opacity: 0.9
+
+.content
+  padding: 2rem
+  display: grid
+  grid-template-columns: 1fr 1fr
+  gap: 2rem
+
+  @media (max-width: 768px)
+    grid-template-columns: 1fr
+
+.card
+  background: light
+  border-radius: 10px
+  padding: 1.5rem
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05)
+
+  h2
+    color: primary
+    margin-bottom: 1rem
+    padding-bottom: 0.5rem
+    border-bottom: 2px solid success
+
+  h3
+    color: secondary
+    margin: 1.2rem 0 0.5rem
+
+pre
+  background: #2d2d2d
+  color: #f8f8f2
+  padding: 1rem
+  border-radius: 5px
+  overflow-x: auto
+  margin: 1rem 0
+  font-family: 'Consolas', monospace
+
+code
+  padding: 0.2rem 0.4rem
+  border-radius: 3px
+  font-family: 'Consolas', monospace
+
+.metrics
+  display: grid
+  grid-template-columns: repeat(3, 1fr)
+  gap: 1rem
+  margin-top: 2rem
+  padding: 0 2rem
+
+  @media (max-width: 992px)
+    grid-template-columns: 1fr
+
+.metricCard
+  background: white
+  padding: 1.5rem
+  border-radius: 10px
+  text-align: center
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05)
+  border-top: 4px solid
+
+  &.lcp
+    border-color: warning
+
+  &.cls
+    border-color: success
+
+  &.inp
+    border-color: primary
+
+.metricValue
+  font-size: 2rem
+  font-weight: bold
+  margin: 0.5rem 0
+
+.metricLabel
+  font-size: 1rem
+  color: gray
+
+.status
+  display: inline-block
+  padding: 0.3rem 0.8rem
+  border-radius: 20px
+  font-size: 0.9rem
+  margin-top: 0.5rem
+
+  &.good
+    background: #e6f7ee
+    color: #0a9955
+
+  &.poor
+    background: #fde8e8
+    color: #e53e3e
+
+.btn
+  display: inline-block
+  background: primary
+  color: white
+  padding: 0.8rem 1.5rem
+  border-radius: 6px
+  text-decoration: none
+  font-weight: 600
+  margin-top: 1rem
+  transition: all 0.3s ease
+  border: none
+  cursor: pointer
+  margin-right: 1rem
+
+  &:hover
+    background: secondary
+    transform: translateY(-2px)
+
+.footer
+  text-align: center
+  padding: 2rem
+  color: gray
+  font-size: 0.9rem
+
+.cacheDemo
+  margin-top: 1.5rem
+  padding: 1rem
+  background: #f8f9fa
+  border-radius: 8px
+  border-left: 4px solid primary
+
+.demoControls
+  display: flex
+  gap: 1rem
+  margin-top: 1rem
+  flex-wrap: wrap
+
+.demoResult
+  margin-top: 1rem
+  padding: 1rem
+  background: #e9ecef
+  border-radius: 6px
+  min-height: 80px
+  white-space: pre-line
+
+ul
+  padding-left: 1.5rem
+  margin: 1rem 0
+
+li
+  margin-bottom: 0.5rem
