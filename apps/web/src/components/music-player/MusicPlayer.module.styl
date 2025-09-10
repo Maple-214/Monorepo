@@ -1,0 +1,38 @@
+/* 基础样式 */
+.range-thumb
+  height 8px
+
+/* webkit track */
+.range-thumb::-webkit-slider-runnable-track
+  height 8px
+  border-radius 9999px
+
+/* webkit thumb */
+.range-thumb::-webkit-slider-thumb
+  -webkit-appearance none
+  appearance none
+  width 16px
+  height 16px
+  border-radius 9999px
+  background #111827
+  margin-top -4px /* 把 thumb 居中到 track */
+  box-shadow 0 0 0 6px rgba(17,24,39,0.06)
+  cursor pointer
+
+/* firefox track/thumb */
+.range-thumb::-moz-range-track
+  height 8px
+  border-radius 9999px
+
+.range-thumb::-moz-range-thumb
+  width 16px
+  height 16px
+  border-radius 9999px
+  background #111827
+  border none
+  box-shadow 0 0 0 6px rgba(17,24,39,0.06)
+  cursor pointer
+
+/* focus 可见性 */
+.range-thumb:focus
+  outline none

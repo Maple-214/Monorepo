@@ -1,5 +1,6 @@
 import React from 'react';
 import { Icons } from './IconSvgs';
+import { MusicPlayer } from '../music-player';
 
 interface FeaturesSectionProps {
   isDark: boolean;
@@ -12,10 +13,11 @@ interface FeatureCardProps {
   gradientFrom: string;
   gradientTo: string;
   hoverColor: string;
+  CustomComponent?: React.ComponentType<{ isDark?: boolean }>;
   isDark: boolean;
 }
 
-// 颜色映射对象 - 修复所有颜色类名
+// 颜色映射对象
 const colorClasses = {
   pink: {
     gradientDark: 'from-pink-500 to-purple-500',
@@ -77,8 +79,7 @@ const FeatureCard = ({
   icon: Icon,
   title,
   description,
-  // gradientFrom,
-  // gradientTo,
+  CustomComponent,
   hoverColor,
   isDark,
 }: FeatureCardProps) => {
@@ -86,27 +87,33 @@ const FeatureCard = ({
 
   return (
     <div
-      className={`group p-6 rounded-xl border transition-all duration-300 hover:transform hover:scale-105 ${
+      className={`group rounded-xl border transition-all duration-300 hover:transform hover:scale-105 ${
         isDark
           ? `bg-gradient-to-br from-gray-900/50 to-gray-800/30 border-gray-800 ${colorClass.borderDark}`
           : `bg-gradient-to-br from-gray-50 to-gray-100/50 border-gray-200 ${colorClass.borderLight}`
       }`}
     >
-      <div
-        className={`w-12 h-12 bg-gradient-to-br rounded-lg flex items-center justify-center mb-4 group-hover:shadow-lg transition-all ${
-          isDark
-            ? `${colorClass.gradientDark} ${colorClass.hoverShadowDark}`
-            : `${colorClass.gradientLight} ${colorClass.hoverShadowLight}`
-        }`}
-      >
-        <div className="text-white">
-          <Icon />
+      {CustomComponent ? (
+        <CustomComponent isDark={isDark} />
+      ) : (
+        <div className="p-6">
+          <div
+            className={`w-12 h-12 bg-gradient-to-br rounded-lg flex items-center justify-center mb-4 group-hover:shadow-lg transition-all ${
+              isDark
+                ? `${colorClass.gradientDark} ${colorClass.hoverShadowDark}`
+                : `${colorClass.gradientLight} ${colorClass.hoverShadowLight}`
+            }`}
+          >
+            <div className="text-white">
+              <Icon />
+            </div>
+          </div>
+          <h3 className={`text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
+            {title}
+          </h3>
+          <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{description}</p>
         </div>
-      </div>
-      <h3 className={`text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
-        {title}
-      </h3>
-      <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{description}</p>
+      )}
     </div>
   );
 };
@@ -121,6 +128,7 @@ export default function FeaturesSection({ isDark }: FeaturesSectionProps) {
       gradientFrom: 'pink',
       gradientTo: 'purple',
       hoverColor: 'pink',
+      CustomComponent: MusicPlayer, // ✅ 直接传入组件
     },
     {
       icon: Icons.Package,
@@ -183,11 +191,11 @@ export default function FeaturesSection({ isDark }: FeaturesSectionProps) {
                   : 'bg-gradient-to-r from-gray-700 to-gray-500'
               }`}
             >
-              其他优秀项目预览
+              插件预览
             </span>
           </h2>
           <p className={`text-xl max-w-2xl mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            展示一些其他优秀的项目，以供参考。
+            展示一些其他插件、组件以供参考。
           </p>
         </div>
 

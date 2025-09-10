@@ -36,7 +36,7 @@ export default function CodeExampleSection({ isDark }: CodeExampleSectionProps) 
             <div className="text-blue-400">$ Local: http://localhost:5173/</div>
             <div className="text-gray-400">$ cd apps/app1 && pnpm run dev</div>
             <div className="text-blue-400">$ Local: http://localhost:5001/</div>
-            <div className="text-gray-400">$ cd apps/app1 && pnpm run dev</div>
+            <div className="text-gray-400">$ cd apps/app2 && pnpm run dev</div>
             <div className="text-blue-400">$ Local: http://localhost:5002/</div>
             <div className="text-pink-400">● apps/web:build: cached, replayed in 52ms</div>
             <div className="text-purple-400">● packages/ui:build: cached, replayed in 35ms</div>
