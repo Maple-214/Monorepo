@@ -2,6 +2,9 @@ import React from 'react';
 import { Card, Button } from '@heroui/react';
 import { Icon } from '@iconify/react';
 import styles from './MusicPlayer.module.styl';
+import QingTian from './assets/music/晴天-小柔.mp3';
+import HaiSe from './assets/music/海色-小柔.mp3';
+import HuaHai from './assets/music/花海-小柔.mp3';
 
 interface Song {
   id: number;
@@ -31,11 +34,10 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ isDark = false }) => {
   const playlist: Song[] = [
     {
       id: 1,
-      title: '小柔Channel',
-      artist: '晴天',
+      title: '晴天',
+      artist: '小柔Channel',
       cover: 'http://imge.kugou.com/stdmusic/120/20220117/20220117153343822315.jpg',
-      audio:
-        'https://sharefs.kugou.com/202509110043/2a332871c754850edc8936aa9a73ad26/v3/7307921e861154495cdcb5a3e9ff01ba/yp/full/ap1000_us0_pi409_s782798405.mp3',
+      audio: QingTian,
       duration: 272,
     },
     {
@@ -43,8 +45,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ isDark = false }) => {
       title: '花海',
       artist: '小柔Channel',
       cover: 'http://imge.kugou.com/stdmusic/120/20220117/20220117153343822315.jpg',
-      audio:
-        'https://sharefs.kugou.com/202509110140/c5f13e6dcd0ecabaf2723a85287808c6/v3/1e160db54f124c435cda8fb880745497/yp/full/ap1000_us0_pi409_s4251160347.mp3',
+      audio: HuaHai,
       duration: 180,
     },
     {
@@ -52,7 +53,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ isDark = false }) => {
       title: '海色',
       artist: '小柔Channel',
       cover: 'http://imge.kugou.com/stdmusic/120/20220117/20220117153343822315.jpg',
-      audio: 'https://music.163.com/song/media/outer/url?id=2128522811.mp3',
+      audio: HaiSe,
       duration: 240,
     },
   ];
